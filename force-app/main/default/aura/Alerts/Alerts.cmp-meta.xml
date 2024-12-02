@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AuraDefinitionBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>52.0</apiVersion>
+    <description>This component displays an Alert box within Experience Cloud sites to provide customers information. This is controlled by the Community Alerts object. Component Name in object must = Component Name in site to display properly.</description>
+</AuraDefinitionBundle>

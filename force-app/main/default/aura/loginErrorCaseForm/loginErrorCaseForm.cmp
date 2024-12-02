@@ -1,0 +1,37 @@
+<aura:component controller="loginErrorCaseForm" implements="forceCommunity:availableForAllPageTypes" access="global" >
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+    <aura:handler name="render" value="{!this}" action="{!c.onRender}" />
+    <aura:attribute name="recaptchaResponse" type="String" />
+    <aura:attribute name="suppliedName" type="String" />
+    <aura:attribute name="suppliedCompany" type="String" />
+    <aura:attribute name="suppliedEmail" type="String" />
+    <aura:attribute name="subject" type="String"/>
+    <aura:attribute name="description" type="String" />
+    
+    <div class="card">
+    <lightning:card class="slds-size_large slds-p-around_small">
+       <div class="slds-p-around_small">
+     
+     <center>      
+     <img src="{!$Resource.Cin7ConnectLogo}" style="width:250px;height:100%;"></img>
+    </center>     
+    <h1 style="text-align:center; font-size:110%">We are unable to log you in to Cin7 Connect at this time. To submit a ticket with our support team, fill out the fields below.</h1>
+    <br/>
+    <lightning:input label="Name" name="name" value='{!v.suppliedName}' required='true'/>
+    <br/>
+    <lightning:input label="Email" name="SuppliedEmail" value='{!v.suppliedEmail}' required='true'/>
+    <br/>
+    <lightning:input label="Account Name" name="SuppliedCompany" value='{!v.suppliedCompany}' required='true'/>
+    <br/>
+    <lightning:input label="Subject" name="subject" value='Cin7 Connect Login Issue' readonly='true'/>
+    <br/>
+    <lightning:textarea label="Description" name="description" value='{!v.description}' required='true'/>
+   	<div id="recaptchaCheckbox"></div>
+   	<br/>
+    <lightning:button variant="brand" aura:id="myButton" label="Submit" onclick="{!c.doSubmit}" disabled="true" />
+    <lightning:notificationsLibrary aura:id="notifLib"/>
+    
+        </div>
+    </lightning:card>
+	</div>
+</aura:component>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>56.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="whatDoYouNeedHelpWith" label="What Do You Need Help With?" type="String" role="outputOnly"/>
+            <property name="whichTopicDoesThisRelateTo" label="Which Topic Does This Relate To?" type="String" role="outputOnly"/>
+            <property name="whatSpecificArea" label="What Specific Area?" type="String" role="outputOnly"/>
+            <property name="classification" label="Classification" type="String" role="outputOnly"/>
+            <property name="classificationType" label="Classification Type" type="String" role="outputOnly"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

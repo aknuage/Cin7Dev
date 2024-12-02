@@ -1,0 +1,29 @@
+<aura:component controller="AccountGreedController" 
+                implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" 
+                access="global">
+    <aura:attribute name="ltngcurrentRecId" type="String" />
+    <aura:attribute name="gridColumns" type="list" />
+    <aura:attribute name="gridData" type="Object" />
+    <aura:attribute name="gridExpandedRows" type="List" access="PRIVATE" />
+    <aura:attribute name="totalAmount" type="Decimal" />
+    <aura:attribute name="accountDetail" type="Account" />
+    <aura:attribute name="accountName" type="String" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <div class="slds-card">
+        <lightning:treeGrid columns="{! v.gridColumns }"
+                            data="{! v.gridData }"
+                            keyField="name"
+                            expandedRows="{! v.gridExpandedRows}"
+                            aura:id="mytree" /> 
+        
+         <div class="slds-card__body slds-card__body_inner">
+            <div class="slds-clearfix">
+                <div class="slds-float_right">
+                    <strong><p class="totalAmount"><lightning:formattedNumber value="{!v.totalAmount}" style="currency" currencyCode="NZD" /></p></strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</aura:component>

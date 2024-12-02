@@ -1,0 +1,3 @@
+<design:component>
+	<design:attribute name="URL" label="URL for the button" description="Change the URL for the button from here" />
+</design:component>

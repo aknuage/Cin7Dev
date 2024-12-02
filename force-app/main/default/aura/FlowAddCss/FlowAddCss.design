@@ -1,0 +1,3 @@
+<design:component label="CSS To Add">
+    <design:attribute name="CSSToAdd" label="CSS" description="To add to the page/flow eg. body{background:#efefef;}" required="true"/>
+</design:component>

@@ -1,0 +1,537 @@
+/*Header CSS */
+
+.THIS html {
+    font-family: sans-serif;
+    font-size: 10px;
+    font-weight: 300;
+}
+
+.THIS * {
+    box-sizing: border-box;
+}
+
+.THIS *::before,
+.THIS *::after {
+    box-sizing: border-box;
+}
+
+.THIS body {
+    margin: 0px;
+    font-family: "Source Sans Pro", sans-serif;
+    font-weight: 300;
+    line-height: 1.5;
+    color: #555;
+    font-size: 16px;
+}
+
+.THIS a {
+    background-color: transparent;
+}
+
+.THIS h1 {
+    margin: 0.67em 0px;
+    font-size: 2em;
+}
+
+.THIS h1,
+.THIS h2,
+.THIS h3,
+.THIS h4,
+.THIS h5,
+.THIS h6 {
+    font-weight: 300;
+    letter-spacing: 0.2px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.THIS h1,
+.THIS h2,
+.THIS h3 {
+    line-height: 1.2;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.THIS h1 {
+    font-size: 44px;
+}
+
+.THIS img {
+    border: 0px none;
+    vertical-align: middle;
+}
+
+.THIS button,
+.THIS input,
+.THIS optgroup,
+.THIS select,
+.THIS textarea {
+    margin: 0px;
+    font: inherit;
+    color: inherit;
+}
+
+.THIS input {
+    line-height: normal;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.THIS sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0px, 0px, 0px, 0px);
+    border: 0px none;
+}
+
+.THIS h1,
+.THIS .h1 {
+    font-size: 36px;
+}
+
+.THIS .text-center {
+    text-align: center;
+}
+
+.THIS ul,
+.THIS ol {
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+.THIS a,
+.THIS a:hover,
+.THIS a::after,
+.THIS a::before,
+.THIS a *,
+.THIS button {
+    text-decoration: none;
+    transition: all 300ms ease 0s;
+    color: #21bb90;
+}
+
+
+ .cSimpleCin7CustomerTheme a, .cSimpleCin7CustomerTheme a:hover, .cSimpleCin7CustomerTheme a:after, .cSimpleCin7CustomerTheme a:before, .cSimpleCin7CustomerTheme a *, .cSimpleCin7CustomerTheme button{
+    color:#21bb90;
+}
+/*.cSimpleCin7CustomerTheme button{
+	
+	color:#fff;
+} */
+
+.THIS input,
+.THIS textarea,
+.THIS select {
+    border: 1px solid rgb(204, 204, 204);
+    padding: 15px 20px;
+    border-radius: 3px;
+}
+
+.THIS label {
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    max-width: 100%;
+}
+
+.THIS .clearfix::before,
+.THIS .clearfix::after,
+.THIS .dl-horizontal dd::before,
+.THIS .dl-horizontal dd::after,
+.THIS .container::before,
+.THIS .container::after,
+.THIS .container-fluid::before,
+.THIS .container-fluid::after,
+.THIS .row::before,
+.THIS .row::after,
+.THIS .form-horizontal .form-group::before,
+.THIS .form-horizontal .form-group::after,
+.THIS .btn-toolbar::before,
+.THIS .btn-toolbar::after,
+.THIS .btn-group-vertical > .btn-group::before,
+.THIS .btn-group-vertical > .btn-group::after,
+.THIS .nav::before,
+.THIS .nav::after,
+.THIS .navbar::before,
+.THIS .navbar::after,
+.THIS .navbar-header::before,
+.THIS .navbar-header::after,
+.THIS .navbar-collapse::before,
+.THIS .navbar-collapse::after,
+.THIS .pager::before,
+.THIS .pager::after,
+.THIS .panel-body::before,
+.THIS .panel-body::after,
+.THIS .modal-header::before,
+.THIS .modal-header::after,
+.THIS .modal-footer::before,
+.THIS .modal-footer::after {
+    content: " ";
+    display: table;
+}
+
+.THIS .pull-right {
+    float: right important;
+}
+
+.THIS .pull-left {
+    float: left important;
+}
+
+.THIS .brand img {
+    height: 60px;
+}
+
+.THIS .container {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.THIS .container,
+.THIS .container-fluid {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    overflow: auto;
+}
+.THIS .mainContentArea .container{
+	overflow: visible;
+	
+}
+
+.THIS .cinheader .container{
+	overflow:visible;
+}
+.THIS .dark-section h1,
+.THIS .dark-section h2,
+.THIS .dark-section h3,
+.THIS .dark-section h4,
+.THIS .dark-section h5,
+.THIS .dark-section h6 {
+    color: #fff;
+}
+
+
+.THIS .p-relative {
+    position: relative;
+}
+
+.THIS .cinheader {
+    padding: 10px 20px;
+    position: fixed;
+    width: 100%;
+    background: rgb(255, 255, 255) none repeat scroll 0% 0%;
+    z-index: 100;
+    box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.THIS .cinheader .container {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.THIS .search-outer-container {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.THIS .search-wrapper {
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+}
+
+.THIS .search-outer-container{
+    padding-top: 0px;
+    padding-bottom:0px;
+}
+
+.THIS .nav.navbar-nav{
+    padding:20px 0 0 0;
+    
+}
+.THIS .nav.navbar-nav li a{
+    padding:20px ;
+    color:#000;
+    font-weight:300;
+}
+.THIS .selfServiceProfileMenuTrigger .profileName{
+    font-weight:300;
+    
+}
+
+.THIS .brand {
+    padding: 7px 0px 8px;
+}
+
+.THIS .search-outer-container {
+    padding: 90px 0px 20px;
+    background: transparent url("http://cin7helpsite.azurewebsites.net/media/1073/home-header-bg2.jpg") no-repeat scroll center top / cover;
+}
+.THIS .search-container{
+    background-image:none !important;
+    margin:50px 0 0 0 !important;
+	background-color:transparent !important;
+    
+}
+.THIS .forceCommunityOmniBox.selfServiceSearchWrapper .search-button.uiButton{
+	background-color:rgba(123, 216, 190, 1) !important;
+}
+.THIS .selfServiceSearchWrapper.big-search-container{
+	height:auto !important;
+}
+
+.THIS .banner-search .hs-input {
+    border: 0 none;
+    letter-spacing: 1px;
+    position: relative;
+    width: 100%;
+}
+
+.THIS .banner-search .p-relative::after {
+    color: #21bb90;
+    content: "\f002";
+    font: 18px/1 FontAwesome;
+    position: absolute;
+    right: 1em;
+    top: 35%;
+}
+.THIS .uiMenuList--default{
+    
+    overflow:visible;
+    
+}
+.THIS .uiMenuList--default ul{
+    max-height: inherit;
+    overflow:visible;
+}
+
+@media (min-width: 768px) {
+    .THIS .container1 {
+        width: 750px;
+    }
+}
+
+@media (min-width: 992px) {
+    .THIS .container {
+        width: 970px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .THIS .container {
+        width: 1170px;
+    }
+}
+
+.THIS .container-fluid {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.THIS .row {
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.THIS .col-xs-10 {
+    width: 83.3333%;
+}
+
+.THIS .col-xs-offset-1 {
+    margin-left: 8.33333%;
+}
+
+.THIS .container-fluid {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.THIS .container,
+.THIS .container-fluid {
+    padding-bottom: 50px;
+    padding-top: 50px;
+}
+
+@media (min-width: 768px) {
+    .THIS .col-sm-1,
+    .THIS .col-sm-2,
+    .THIS .col-sm-3,
+    .THIS .col-sm-4,
+    .THIS .col-sm-5,
+    .THIS .col-sm-6,
+    .THIS .col-sm-7,
+    .THIS .col-sm-8,
+    .THIS .col-sm-9,
+    .THIS .col-sm-10,
+    .THIS .col-sm-11,
+    .THIS .col-sm-12 {
+        float: left;
+    }
+    .THIS .col-sm-8 {
+        width: 66.6667%;
+    }
+    .THIS .col-sm-offset-2 {
+        margin-left: 16.6667%;
+    }
+}
+
+@media (min-width: 992px) {
+    .THIS .col-md-1,
+    .THIS .col-md-2,
+    .THIS .col-md-3,
+    .THIS .col-md-4,
+    .THIS .col-md-5,
+    .THIS .col-md-6,
+    .THIS .col-md-7,
+    .THIS .col-md-8,
+    .THIS .col-md-9,
+    .THIS .col-md-10,
+    .THIS .col-md-11,
+    .THIS .col-md-12 {
+        float: left;
+    }
+    .THIS .col-md-6 {
+        width: 50%;
+    }
+    .THIS .col-md-offset-3 {
+        margin-left: 25%;
+    }
+}
+
+.THIS label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+@media (min-width: 768px) {
+    .THIS .navbar-nav {
+        margin: 7.5px -15px;
+    }
+    .THIS .navbar-nav > li > a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        line-height: 20px;
+    }
+    .THIS .navbar-nav {
+        float: left;
+        margin: 0px;
+    }
+    .THIS .navbar-nav > li {
+        float: left;
+    }
+    .THIS .navbar-nav > li > a {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    .THIS .navbar-right {
+        float: right important;
+        margin-right: -15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .THIS .banner-search .hs-input {
+        width: 100%;
+        letter-spacing: 1px;
+        position: relative;
+        border: 0px none;
+    }
+}
+
+
+/* Footer */
+
+.THIS p {
+    margin: 0px 0px 10px;
+}
+
+.THIS article,
+.THIS aside,
+.THIS details,
+.THIS figcaption,
+.THIS figure,
+.THIS footer,
+.THIS header,
+.THIS hgroup,
+.THIS main,
+.THIS menu,
+.THIS nav,
+.THIS section,
+.THIS summary {
+    display: block;
+}
+
+.THIS ul.clean {
+    padding: 5px 0px;
+    list-style: outside none none;
+}
+
+.THIS ul.clean li {
+    padding: 5px 0px;
+}
+
+.THIS .col-sm-3 {
+    width: 25%;
+    float: left;
+}
+
+.THIS footer {
+    background: rgb(239, 239, 239) none repeat scroll 0% 0%;
+}
+
+.THIS footer ul.clean {
+    margin-bottom: 40px;
+}
+
+.THIS footer ul.clean li {
+    padding: 0px;
+}
+
+.THIS footer li a {
+    color: #333;
+    font-size: 14px;
+}
+
+.THIS footer li.title {
+    margin: 0px 0px 10px;
+}
+
+.THIS footer li.title a {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.THIS footer li a:hover {
+    color: #21bb90;
+}
+
+.THIS footer .copyright {
+    padding: 10px 0px;
+    background: #21bb90;
+    color: #fff;
+}
+
+.THIS footer .copyright a {
+    color: #fff;
+}
+
+.THIS .mainContentArea {
+    min-height: 500px;
+    padding-left: 50px;
+    padding-right: 50px;
+    text-align: centre;
+}

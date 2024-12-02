@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AuraDefinitionBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>52.0</apiVersion>
+    <description>Gives customers that experience errors when attempting to log in to Connect an opportunity to securely reach out for support while not having to be logged in using reCAPTHCA.</description>
+</AuraDefinitionBundle>

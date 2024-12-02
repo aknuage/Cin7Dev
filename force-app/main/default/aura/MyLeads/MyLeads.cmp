@@ -1,0 +1,21 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" >
+	 <div class="slds"> 
+
+    <table class="slds-table slds-table--bordered slds-table--striped">
+        <thead>
+            <tr>
+                <th scope="col"><span class="slds-truncate">Name</span></th>
+                <th scope="col"><span class="slds-truncate">Company</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <aura:iteration items="{!v.leads}" var="lead">
+                <tr>
+                    <td>{!lead.Name}</td>
+                    <td>{!lead.Company}</td>
+                </tr>
+            </aura:iteration>
+        </tbody>
+    </table>
+        </div>
+</aura:component>

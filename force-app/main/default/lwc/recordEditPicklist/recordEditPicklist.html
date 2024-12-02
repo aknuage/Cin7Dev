@@ -1,0 +1,23 @@
+<template>
+    <!-- Build out record-type-id logic -->
+    <lightning-record-edit-form object-api-name="Case">
+        <lightning-messages>
+        </lightning-messages>
+        <lightning-input-field field-name="What_do_you_need_help_with1__c" type="picklist" onchange={handleChange1} name="WhatDoYouNeedHelpWith" label="What Do You Need Help With" required>
+        </lightning-input-field>
+        <lightning-input-field field-name="Which_topic_does_this_relate_to1__c" type="picklist" onchange={handleChange2} name="WhichTopicDoesThisRelateTo" label="Which Topic Does This Relate To" required>
+        </lightning-input-field>
+        <lightning-input-field field-name="What_specific_area__c" type="picklist" onchange={handleChange3} name="WhatSpecificArea" label="What Specific Area" required>
+        </lightning-input-field>
+        <lightning-input-field field-name="Classification__c" type="picklist" onchange={handleChange4} name="Classification" label="Classification" required>
+        </lightning-input-field>
+        <lightning-input-field field-name="Classification_Type__c" type="picklist" onchange={handleChange5} name="ClassificationType" label="Classification Type" required>
+        </lightning-input-field>
+        <!-- <lightning-button class="slds-m-top_small"
+                          variant="brand"
+                          type="submit"
+                          name="update"
+                          label="Update">
+        </lightning-button> -->
+    </lightning-record-edit-form>    
+</template>

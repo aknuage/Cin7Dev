@@ -1,0 +1,29 @@
+.THIS {
+    margin-top: 3px;
+}
+
+.THIS .alert_container {
+    position: inblock;
+    margin-bottom: 3px;
+}
+
+.THIS .slds-notify {
+    background-color: #3498DB;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    min-height: 100px;
+    /*text-shadow: 1px 1px 4px #000000;*/ 
+}
+
+.THIS .slds-theme--success {
+    background-color: #2fcc66;
+}
+
+.THIS .slds-theme--error {
+    background-color: #c23934;
+}
+
+.THIS .slds-theme--warning {
+    background-color: #ffe55d;
+    /*text-shadow: 1.5px 1.5px 2px #909090;*/
+}

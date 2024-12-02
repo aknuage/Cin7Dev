@@ -1,0 +1,5 @@
+<apex:page standardController="Case">
+            
+            {!Case.Account.Support_Notes__c }
+            
+</apex:page>

@@ -1,0 +1,6 @@
+.THIS label {
+	color: var(--lwc-brandTextLink, rgb(0, 102, 255));
+}
+.THIS lightning-primitive-icon{
+	color: var(--lwc-brandTextLink, rgb(0, 102, 255));
+}

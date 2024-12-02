@@ -1,0 +1,7 @@
+<aura:documentation>
+	<aura:description>Documentation</aura:description>
+	<aura:example name="Case Creation" ref="casecreation" label="Case Creation">
+		This simple component hooks into the case deflection component using different fields from the standard case
+		quick action
+	</aura:example>
+</aura:documentation>

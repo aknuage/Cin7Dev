@@ -1,0 +1,9 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" >
+    <aura:attribute name="logo" type="String" default="https://pull01-cin7ltd.netdna-ssl.com/wp-content/uploads/2016/09/logo-120.png" access="global" />
+
+
+    <div>
+        <img name="logo" src = "{!v.logo}" ></img>
+    </div>
+	
+</aura:component>

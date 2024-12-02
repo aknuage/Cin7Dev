@@ -1,0 +1,42 @@
+<!-- Original component code - changed below to add order or execution solution -->
+<!-- <aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="PreChatValuesController">
+    <aura:handler name="init" value="this" action="{!c.doInit}"/>
+    <aura:attribute name="userInfo" type="user"/>     
+    <div id="chatFName" hidden="true">
+        {!v.userInfo.FirstName}
+    </div>    
+    <div id="chatLName" hidden="true">
+        {!v.userInfo.LastName}
+    </div>    
+    <div id="chatEmail" hidden="true">
+        {!v.userInfo.Email}
+    </div>    
+    <div id="chatPhone" hidden="true">
+        {!v.userInfo.Phone}
+    </div>    
+    <div id="chatAccNm" hidden="true">
+        {!v.userInfo.Account.Name}
+    </div>   
+</aura:component> -->
+
+
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="PreChatValuesController">
+<aura:handler name="init" value="this" action="{!c.doInit}"/>
+<aura:attribute name="userInfo" type="user"/>
+<div id="chatFName" hidden="true">
+{!v.userInfo.FirstName}
+</div>
+<div id="chatLName" hidden="true">
+{!v.userInfo.LastName}
+</div>
+<div id="chatEmail" hidden="true">
+{!v.userInfo.Email}
+</div>
+<div id="chatPhone" hidden="true">
+{!v.userInfo.Phone}
+</div>
+<div id="chatAccNm" hidden="true">
+{!v.userInfo.Account.Name}
+</div>
+<ltng:require scripts="{!$Resource.ChannelMenuChatCode}" afterScriptsLoaded="{!c.onScriptsLoaded}" />
+</aura:component>

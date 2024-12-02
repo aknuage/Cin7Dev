@@ -1,0 +1,6 @@
+<design:component>
+   
+    <design:attribute name="logo" label="logo" />
+
+	
+</design:component>

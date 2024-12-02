@@ -1,0 +1,11 @@
+<aura:component implements="flexipage:availableForAllPageTypes">
+	<lightning:listView aura:id="Scored_Leads_Overview"
+    objectApiName="Lead"
+    listName="Scored_Leads_Overview"
+    rows="3"
+    showSearchBar="false"
+    showActionBar="false"
+    enableInlineEdit="true"
+    showRowLevelActions="false"
+	/>
+</aura:component>

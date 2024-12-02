@@ -1,0 +1,27 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global"
+	><aura:attribute name="isDisabled" type="Boolean" default="false" />
+
+	<aura:registerEvent name="appEvent" type="selfService:caseCreateFieldChange" />
+
+	<div class="slds-is-relative">
+		<lightning:spinner aura:id="mySpinner" alternative-text="Loading..." class="slds-hide"> </lightning:spinner>
+	</div>
+
+	<lightning:recordEditForm aura:id="recordEditForm" objectApiName="Case" onsubmit="{!c.handleSubmit}" onsuccess="{!c.handleSuccess}" onerror="{!c.handleError}">
+		<lightning:messages />
+		<lightning:inputField variant="label-stacked" fieldName="Subject" onchange="{!c.itemsChange}" aura:id="field" required="true" />
+
+		<lightning:inputField variant="label-stacked" fieldName="What_do_you_need_help_with1__c" onchange="{!c.itemsChange}" aura:id="field" required="true" />
+		<lightning:inputField variant="label-stacked" fieldName="Which_topic_does_this_relate_to1__c" onchange="{!c.itemsChange}" aura:id="field" />
+		<lightning:inputField variant="label-stacked" fieldName="What_specific_area__c" onchange="{!c.itemsChange}" aura:id="field" />
+		<lightning:inputField variant="label-stacked" fieldName="Classification__c" aura:id="field" />
+		<lightning:inputField variant="label-stacked" fieldName="Classification_Type__c" aura:id="field" />
+		<lightning:inputField variant="label-stacked" fieldName="Description" onchange="{!c.itemsChange}" aura:id="field" required="true" />
+		<lightning:inputField variant="label-stacked" fieldName="How_Issue_Impact__c" aura:id="field" required="true" />
+		<lightning:inputField variant="label-stacked" fieldName="Who_is_affected_by_the_issue__c" aura:id="field" required="true" />
+		<lightning:inputField variant="label-stacked" fieldName="AccountId" aura:id="field" />
+		<lightning:inputField variant="label-stacked" fieldName="ContactId" aura:id="field" />
+		<lightning:inputField class="slds-hide" fieldName="Origin" value="Customer_Portal" />
+		<lightning:button class="slds-var-m-top_small" type="submit" label="Create new" disabled="{!v.isDisabled}" />
+	</lightning:recordEditForm>
+</aura:component>

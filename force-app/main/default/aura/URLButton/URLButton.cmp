@@ -1,0 +1,5 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" >
+    <aura:attribute name="URL" type="String" default="http://google.com" access="global" />
+    
+	<a href="{!v.URL}" class="button">Click Me</a>
+</aura:component>

@@ -1,0 +1,95 @@
+<aura:component implements="forceCommunity:themeLayout,forceCommunity:searchInterface" access="global" description="Sample Custom Theme Layout">
+    <aura:attribute name="search" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="profileMenu" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="navBar" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="header" type="Aura.Component[]" required="false"/>
+    <div>
+        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600,700,900,200" rel="stylesheet" type="text/css"></link>
+        <div class="cinheader">
+            <div class="container relative">
+                <div class="pull-left ">
+                    <div class="header-inner">
+                        <div class="brand inline"><a href="/s/"><img alt="logo" height="60" src="http://cin7helpsite.azurewebsites.net/media/1013/logo-cin7.png" /></a> </div>
+                        </div>
+                    </div>
+                    <div class="pull-right ">
+                        <ul class="nav navbar-nav navbar-right navbarspacingleft navbarspacingright">
+                            <!-- <li><a href="/s/case/:objectName/:filterId">My Cases</a></li> enabling cases on the customer cummunity page -->
+                            <li><a href="https://help.cin7.com/updates" target="_blank">Updates</a></li>
+                            <li><a href="https://help.cin7.com/contact" target="_blank">Contact Support</a></li>
+                            <li>
+                                <div class="profileMenuRegion" id="profileMenuRegion">
+                            		{!v.profileMenu}
+                        		</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="search-outer-container dark-section">
+                <div class="container-fluid relative">
+                    <div class="row text-center">
+                        <div class="col-xs-10  col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 ">
+                            <h1>Welcome to Premium Support<i class="em-grinning"></i></h1>
+                            <!--<div class="banner-search">
+                                <div class="search">
+                    {!v.search}
+                </div> 
+                             </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+                
+                
+                
+                
+                
+                <div class="mainContentArea">
+                    {!v.body}
+                
+               </div>
+                <footer>
+  <div class="container relative">
+    <div class="row">
+      <div class="col-sm-3 col-xs-6  ">
+        <ul class="clean">
+            <li class="title"><a href="/s/">Cin7 Premium Support</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-3 col-xs-6  ">
+        <ul class="clean">
+          <li class="title"><a href="https://help.cin7.com" target="_blank">Cin7 Help</a></li>
+            <li><a href="https://help.cin7.com/documentation/core-modules" target="_blank">Documentation</a></li>
+          <li><a href="https://help.cin7.com/contact" target="_blank">Contact Support</a></li>
+          <li><a href="https://help.cin7.com/udpates" target="_blank">Updates</a></li>
+            <li><a href="https://status.cin7.com/" target="_blank">Status</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-3 col-xs-6  ">
+        <ul class="clean">
+            <li class="title"><a href="http://cin7.com" target="_blank">Cin7.com</a></li>
+          <li><a href="https://www.cin7.com/software/features/" target="_blank">Features</a></li>
+          <li><a href="https://www.cin7.com/software/integrations/" target="_blank">Integrations</a></li>
+          <li><a href="http://blog.cin7.com" target="_blank">Blog</a></li>
+            <li><a href="http://go.cin7.com/cloud" target="_blank">Cin7 Log In</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-3 col-xs-6  ">
+        <ul class="clean">
+          <li class="title"><a href="https://www.cin7.com/about-us/" target="_blank">About Us</a></li>
+          <li><a href="https://www.cin7.com/resources/webinars/" target="_blank">Webinars</a></li>
+          <li><a href="https://cin7.appointlet.com/" target="_blank">Book a Chat</a></li>
+          <li><a href="https://www.cin7.com/resources/partner-program-register/" target="_blank">Become a Partner</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid relative text-center copyright">
+      <p>Copyright © CIN7 2017<br/>
+      <a href="http://www.cin7.com">www.cin7.com</a></p>
+  </div>
+</footer>
+            </div>
+            
+        </aura:component>
