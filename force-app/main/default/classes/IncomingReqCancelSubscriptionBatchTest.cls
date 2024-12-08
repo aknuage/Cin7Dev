@@ -1,5 +1,5 @@
 @isTest
-public with sharing class IncomingRequestCancelSubscriptionTest {
+public with sharing class IncomingReqCancelSubscriptionBatchTest {
 
    
     @isTest

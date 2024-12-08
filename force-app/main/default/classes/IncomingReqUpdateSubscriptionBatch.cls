@@ -1,9 +1,9 @@
-public with sharing class IncomingRequestBatchableNewOpp implements Database.Batchable<sObject>, Database.Stateful, Database.AllowsCallouts 
+public with sharing class IncomingReqUpdateSubscriptionBatch implements Database.Batchable<sObject>, Database.Stateful, Database.AllowsCallouts 
 {
     private List<Incoming_Request__c> requestsToProcess;
     private Id recordTypeId;
 
-    public IncomingRequestBatchableNewOpp(List<Incoming_Request__c> newRequests) 
+    public IncomingReqUpdateSubscriptionBatch(List<Incoming_Request__c> newRequests) 
     {
         // Assign local vars
         this.requestsToProcess = newRequests;
@@ -207,7 +207,7 @@ public with sharing class IncomingRequestBatchableNewOpp implements Database.Bat
             // Now insert opp lines
             List<OpportunityLineItem> oppLinesToInsert = new List<OpportunityLineItem>();
             for (Id irId : oppsToInsertByRequestId.keySet()) {
-                List<OpportunityLineItem> oliList = oppLinesToInsertByRequestId.get(irId);
+            List<OpportunityLineItm> oliList = oppLinesToInsertByRequestId.get(irId);
                 
                 if (oliList != null) {
                     for (OpportunityLineItem oli : oliList) {

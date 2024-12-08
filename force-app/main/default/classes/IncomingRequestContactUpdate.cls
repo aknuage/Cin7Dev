@@ -9,7 +9,6 @@ public class IncomingRequestContactUpdate {
     void processContactUpdateReqs(List<Incoming_Request__c> incomingRequests) {
         List<API_Error_Log__c> apiErrorLogsToInsert = new List<API_Error_Log__c>();
 
-        System.debug('incomingReqs: ' + JSON.serializePretty(incomingRequests));
         for (Incoming_Request__c ir : incomingRequests)
         {
             HttpResponse response = IncomingRequestHelper.GetCoreCustomerDetails(ir.Tenant_Id__c);

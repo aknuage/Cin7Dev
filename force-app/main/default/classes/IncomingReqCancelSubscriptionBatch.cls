@@ -5,12 +5,12 @@
  * 
  * @author: NuAge Experts - akelly - December 2024
  */
-public with sharing class IncomingRequestCancelSubscription implements Database.Batchable<sObject>, Database.Stateful, Database.AllowsCallouts {
+public with sharing class IncomingReqCancelSubscriptionBatch implements Database.Batchable<sObject>, Database.Stateful, Database.AllowsCallouts {
     // TODO: More API error handling?
 
     private List<Incoming_Request__c> requestsToProcess;
     
-    public IncomingRequestCancelSubscription(List<Incoming_Request__c> newRequests) {
+    public IncomingReqCancelSubscriptionBatch(List<Incoming_Request__c> newRequests) {
         this.requestsToProcess = newRequests;
     }
 
@@ -69,7 +69,7 @@ public with sharing class IncomingRequestCancelSubscription implements Database.
             clonedOpp.Is_Active__c = true;
             clonedOpp.Amount = 0;  // Set amount to zero for the cancellation opportunity
             clonedOpp.Pricebook2Id = originalOpp.Pricebook2Id;  // Ensuring the price book is set
-            clonedOpp.Name = originalOpp.Name + ' Cancellation';
+            clonedOpp.Name = originalOpp.Name + ' - Cancellation';
             clonedOpp.CurrencyIsoCode = originalOpp.CurrencyIsoCode;
             clonedOpp.Pricebook2Id = originalOpp.Pricebook2Id;  // Ensuring the price book is set correctly
             clonedOpportunities.add(clonedOpp);

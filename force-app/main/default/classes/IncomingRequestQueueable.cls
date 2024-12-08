@@ -24,16 +24,19 @@ public with sharing class IncomingRequestQueueable implements Queueable,Database
 		{
 			when NewSubscription 
 			{ 
-				Database.executeBatch(new IncomingRequestBatchable(this.incomingRequests), 30); 
+				// Database.executeBatch(new IncomingRequestBatchable(this.incomingRequests), 30);
+				Database.executeBatch(new IncomingReqNewSubscriptionBatch(this.incomingRequests), 30);
 			}
 			when UpdateSubscription 
 			{ 
-				Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30); 
+				// Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30);
+				Database.executeBatch(new IncomingReqUpdateSubscriptionBatch(this.incomingRequests), 30);
+				
 			}
 			when DiscountChange
 			{ 
 				// Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30);
-				Database.executeBatch(new IncomingRequestDiscountChange(this.incomingRequests), 30); 
+				Database.executeBatch(new IncomingReqDiscountChangeBatch(this.incomingRequests), 30); 
 			}
 			when ContactUpdate 
 			{
@@ -41,11 +44,12 @@ public with sharing class IncomingRequestQueueable implements Queueable,Database
 				new IncomingRequestContactUpdate(this.incomingRequests);
 			}
 			when RenewalSubscription { 
-				Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30); 
+				 // Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30);
+				Database.executeBatch(new IncomingReqRenewalSubscriptionBatch(this.incomingRequests), 30); 
 			}
 			when CancelSubscription { 
 				// Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30); 
-				Database.executeBatch(new IncomingRequestCancelSubscription(this.incomingRequests), 30);
+				Database.executeBatch(new IncomingReqCancelSubscriptionBatch(this.incomingRequests), 30);
 			}
 			when else { 
 				Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30); 

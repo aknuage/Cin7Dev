@@ -1,5 +1,5 @@
 @isTest
-public with sharing class IncomingRequestDiscountChangeTest {
+public with sharing class IncomingRequDiscountChangeTest {
 
     @TestSetup
     static void setup(){
@@ -66,7 +66,7 @@ public with sharing class IncomingRequestDiscountChangeTest {
             pbe2.Product2Id = prod2.Id;
             pbe2.UnitPrice = 500;
             pbe2.IsActive = true;
-        PriceBookEntry pbe3 = new PriceBookEntry();
+    PriceBookEntry pbe3 = new PriceBookEntry();
             pbe3.Pricebook2Id = standardPricebook.Id;
             pbe3.Product2Id = prod3.Id;
             pbe3.UnitPrice = 999;

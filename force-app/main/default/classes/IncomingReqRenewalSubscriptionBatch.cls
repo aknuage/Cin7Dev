@@ -5,12 +5,12 @@
  * 
  * @author: NuAge Experts - akelly - December 2024
  */
-public with sharing class IncomingRequestRenewalSubscription implements Database.Batch {
+public with sharing class IncomingReqRenewalSubscriptionBatch implements Database.Batchable<sObject>, Database.Stateful, Database.AllowsCallouts {
 
     private List < API_Error_Log__c > apiErrorLogsToInsert;
     private List < Incoming_Request__c > requestsToProcess;
 
-    public IncomingRequestRenewalSubscription(List < Incoming_Request__c > newRequests) {
+    public IncomingReqRenewalSubscriptionBatch(List < Incoming_Request__c > newRequests) {
         this.requestsToProcess = newRequests;
         this.apiErrorLogsToInsert = new List < API_Error_Log__c > ();
     }
