@@ -128,7 +128,12 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
             Assert.areEqual('cin790', assertOpp.Dear_Tenant_Id__c);
             Assert.areEqual(Date.today(), assertOpp.CloseDate);
             Assert.areEqual(o.RecordTypeId, assertOpp.RecordTypeId);
-            Assert.isTrue(assertOpp.Is_Active__c);
+            // The old, cloned opp should be deactivated
+            if (assertOpp.Name.contains('Cancel')) {
+                Assert.isTrue(assertOpp.Is_Active__c);
+            } else {
+                Assert.isTrue(!assertOpp.Is_Active__c);
+            }
 
             if (assertOpp.Id == o.Id)
             {
@@ -154,9 +159,9 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
                 //System.debug('assertOpps olis: ' + JSON.serializePretty(assertOpp.OpportunityLineItems));
                 for (OpportunityLineItem oli : assertOpp.OpportunityLineItems)
                 {
-                    // Assert.areEqual(0, oli.UnitPrice);
-                    // Assert.isTrue(oli.Quantity != 0);
-                    Assert.areEqual(0, oli.Quantity);
+                    Assert.areEqual(0, oli.UnitPrice);
+                    Assert.isTrue(oli.Quantity != 0);
+                    Assert.areNotEqual(0, oli.Quantity);
                     Assert.areEqual(0, oli.TotalPrice);
                     Assert.isNotNull(oli.PricebookEntryId);
                     foundOppLinesClone = true;

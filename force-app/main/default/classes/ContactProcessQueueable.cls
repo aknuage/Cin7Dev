@@ -165,7 +165,7 @@ public with sharing class ContactProcessQueueable implements Queueable
 
         // DML
         List<API_Error_Log__c> errLog = new List<API_Error_Log__c>();
-
+        
         if (contactsToInsert.size() > 0) Database.insert(contactsToInsert, false);
         if (contactsToUpdate.size() > 0) Database.update(contactsToUpdate.values(), false);
         if (acrsToDelete.size() > 0) Database.delete(acrsToDelete, false);

@@ -45,7 +45,8 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
     
         Map<Id, Opportunity> mostRecentOpps = new Map<Id, Opportunity>();
         Map<Id, List<OpportunityLineItem>> oppLineItemsMap = new Map<Id, List<OpportunityLineItem>>();
-    
+        
+        // Get the most recent Opportunities related to the Account being canceled
         for (Opportunity opp : [
             SELECT Id, Name, AccountId, CloseDate, Dear_Tenant_Id__c, Amount, Is_Active__c, RecordTypeId, StageName, Pricebook2Id,
             CurrencyIsoCode, 
@@ -95,14 +96,15 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
     
                 for (OpportunityLineItem oli : originalLineItems) {
                     OpportunityLineItem clonedOli = oli.clone(false, true);
-                    // clonedOli.Quantity = 0;  // Set quantity to zero for cancellation
-                    clonedOli.UnitPrice = 0;  // Set unit price to zero for cancellation
+                    clonedOli.TotalPrice = null; // Set to Null to prevent field exception on insertion
+                    clonedOli.UnitPrice = 0;  // Set unit price to zero for cancellation, which will update TotalPrice as well
                     clonedOli.OpportunityId = clonedOpp.Id;  // Associate cloned line item with the cloned opportunity
                     clonedLineItems.add(clonedOli);
                 }
             }
         }
     
+        // DML
         // Insert cloned Line Items
         if (!clonedLineItems.isEmpty()) {
             try {
@@ -117,11 +119,8 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
         }
 
         if (!mostRecentOpps.isEmpty()) update mostRecentOpps.values();
-    
-        // Insert any error logs
-        if (!apiErrorLogsToInsert.isEmpty()) {
-            insert apiErrorLogsToInsert;
-        }
+        if (!apiErrorLogsToInsert.isEmpty()) insert apiErrorLogsToInsert;
+        
     }
     
 

@@ -13,6 +13,7 @@ global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObj
     }
 
     public void execute(Database.BatchableContext bc, List < Incoming_Request__c > requests) {
+
         List < Account > accountsToUpdate = new List < Account > ();
         List < Opportunity > oppsToUpdate = new List < Opportunity > ();
         List < API_Error_Log__c > apiErrorLogsToInsert = new List < API_Error_Log__c > ();
@@ -28,6 +29,7 @@ global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObj
 
             // Parse into wrapper
             IncomingRequestJSONParse jsonResp = IncomingRequestJSONParse.parse(response.getBody());
+            System.debug('jsonResp: ' + JSON.serialize(jsonResp));
             // Check for Error in Response
             if (jsonResp.Errors == null) 
             {
@@ -42,10 +44,8 @@ global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObj
                             IncomingRequestHelper.ProcessAccountUpdates(acc, jsonResp)
                         );
                     }
-
-                    if (jsonResp.Data.AdditionalUsers > 0) {
-                        jsonResp.Data.SKUs.add(IncomingRequestHelper.GetAdditionalUserSkus(jsonResp));
-                    }
+                    // Add Additional Users to SKUs if present in the data
+                    jsonResp.Data.SKUs = IncomingRequestHelper.ProcessAdditionalUserSkus(jsonResp);
 
                     for (IncomingRequestJSONParse.SKUs sku: jsonResp.Data.SKUs) {
                         // Create the opp line in case we need it
@@ -63,18 +63,18 @@ global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObj
                         if (!createNewOpp && oppLinesToInsertByRequestId.get(ir.Id) != null) {
                             oppLinesToInsertByRequestId.remove(ir.Id);
                         } else {
-                            oppsToInsertByRequestId.put(ir.Id, IncomingRequestHelper.GetUpdatedOpp(oldOpp, ir, this.recordTypeId));
+                            oppsToInsertByRequestId.put(ir.Id, IncomingRequestHelper.GetNewOpp(oldOpp, ir, this.recordTypeId));
                             // And because we have a new opp, we'll need to deactivate the old
-                            system.debug('updating old opp');
                             oppsToUpdate.add(new Opportunity(Id = oldOpp.Id, Is_Active__c = false));
                         }
                     }
                 } catch (Exception ex) {
-                    apiErrorLogsToInsert = IncomingRequestHelper.LogChangeError(ex, apiErrorLogsToInsert, ir, response);
+                    String errorMsg = 'Error processing Account, Opportunity or incoming SKU: ' + ex.getMessage() + ', Line #: ' + ex.getLineNumber();
+                    apiErrorLogsToInsert.add(IncomingRequestHelper.LogError(ex, errorMsg, ir, response));
                 }
             }
             else {
-                apiErrorLogsToInsert = IncomingRequestHelper.LogResponseError(apiErrorLogsToInsert, jsonResp, response);
+                apiErrorLogsToInsert.add(IncomingRequestHelper.LogResponseError(jsonResp, response));
             }
         }
 

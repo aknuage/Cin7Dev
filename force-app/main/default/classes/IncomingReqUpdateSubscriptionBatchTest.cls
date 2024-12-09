@@ -1,5 +1,5 @@
 @isTest
-public with sharing class IncomingReqDiscountChangeTest {
+public with sharing class IncomingReqUpdateSubscriptionBatchTest {
 
     @TestSetup
     static void setup(){
@@ -131,7 +131,7 @@ public with sharing class IncomingReqDiscountChangeTest {
         req.Message__c = 'UpdateSubscription';
         req.Tenant_ID__c = 'b12294de-e20c-4dc6-8772-416a5c5f5246';
 
-        String getResponse = '{"Data":{"Subscribed": "2022-09-28T13:02:26.457","Cancelled": null,"SubscriptionName": "Standard Yearly 2021","SubscriptionExpirationDate": "2023-10-27T00:00:00","Source": "Partner Referral","ReferredByPartner": "Test","ReferredByPartnerId": "477a126d-e6b3-483f-b223-8c5655bebc9a","PlanType": "standard","IsNeedAttention": true,"CustomerDomain": "Yashodha","Utm_Campaign": null,"Utm_Source": null,"Utm_Medium": null,"Utm_Term": null,"Utm_Content": null,"PartnerType": null,"IsVarPartner": false,"ReferrerDomain": null,"AdditionalUsers": 10,"AdditionalUsersCost": 100,"SKUs": [{"Name": "Pro 2023","Quantity": 1,"Total": 1000.00,"Frequency": "Monthly"},{"Name": "Standard Yearly 2021","Quantity": 2,"Total": 200.00,"Frequency": "Yearly"}],"Country": "Australia","CreateDate": "2022-09-28T12:57:05.767","Email": "ep@dearsystems.com","LastUpdatedDate": null,"Organisation": "Test Var Client 1","SalesPersonEmail": "ele@gmail.com","TenantID": "b12294de-e20c-4dc6-8772-416a5c5f5246","WebsiteURL": "mail.com","Contacts":[{"Phone": "561526","Email": "p.p@dearsystems.com","FirstName": "DEFAULT","LastName": "business contact"}], "Users": [{"UserId": "765f9151-cf0d-439f-8811-b248080fdc31","Email": "bshaw@whitecaps.com","UserType": "owner","DisplayName": "Brendan Shaw"}]}}';
+        String getResponse = '{"Data":{"Subscribed": "2022-09-28T13:02:26.457","Cancelled": null,"SubscriptionName": "Standard Yearly 2021","SubscriptionExpirationDate": "2023-10-27T00:00:00","Source": "Partner Referral","ReferredByPartner": "Test","ReferredByPartnerId": "477a126d-e6b3-483f-b223-8c5655bebc9a","PlanType": "standard","IsNeedAttention": true,"CustomerDomain": "Yashodha","Utm_Campaign": null,"Utm_Source": null,"Utm_Medium": null,"Utm_Term": null,"Utm_Content": null,"PartnerType": null,"IsVarPartner": false,"ReferrerDomain": null,"AdditionalUsers": 10,"AdditionalUsersCost": 100,"SKUs": [{"Name": "Pro 2023","Quantity": 1,"Total": 1000.00,"Frequency": "Monthly"},{"Name": "Standard Yearly 2021","Quantity": 2,"Total": 200.00,"Frequency": "Yearly"}],"Country": "Australia","CreateDate": "2022-09-28T12:57:05.767","Email": "ep@dearsystems.com","LastUpdatedDate": null,"Organisation": "Test Var Client 1","SalesPersonEmail": "ele@gmail.com","TenantID": "b12294de-e20c-4dc6-8772-416a5c5f5246","WebsiteURL": "mail.com","Contacts":[{"Phone": "561526","Email": "p.p@dearsystems.com","FirstName": "DEFAULT","LastName": "business contact"}], "Users": []}}';
         MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
         MockHttpResponseHandler mock = new MockHttpResponseHandler();
         mock.addResponse('callout:Customer_Details', getResp);
@@ -231,9 +231,9 @@ public with sharing class IncomingReqDiscountChangeTest {
         Assert.isTrue(foundUsers);
     }
 
-    // Test method used to test when a "DiscountChange" Incoming Request message is submitted after the account is signed up, and so does create a new Upsell/Downsell opp.
+    // Test method used to test when a "UpdateSubscription" Incoming Request message is submitted after the account is signed up, and so does create a new Upsell/Downsell opp.
     @isTest
-    public static void testDiscountChangeHappyPath() {
+    public static void testUpdateSubscriptionHappyPath() {
         // Prepare pricebook and product setup
         Id pricebookId = Test.getStandardPricebookId();
         Pricebook2 standardPricebook = new Pricebook2(Id = pricebookId, IsActive = true);
@@ -294,11 +294,11 @@ public with sharing class IncomingReqDiscountChangeTest {
     
         Incoming_Request__c req = new Incoming_Request__c();
         req.Source__c = 'Cin7 Core';
-        req.Message__c = 'DiscountChange';
+        req.Message__c = 'UpdateSubscription';
         req.Tenant_ID__c = tenantId;
 
         // Mock callout setup
-        String getResponse = '{"Errors":null,"Data":{"WebsiteURL":null,"Utm_Term":null,"Utm_Source":null,"Utm_Medium":null,"Utm_Content":null,"Utm_Campaign":null,"Users":[{"UserType":"owner","UserId":"cbecdcde-d39c-4620-9d84-1e57afe87e15","Email":"andrew.cooper@cin7.com","DisplayName":"Andrew Cooper"}],"TenantID":"f23932f1-54eb-4bfe-b929-b25fb029056d","SubscriptionName":"Pro 2024.01","SubscriptionExpirationDate":"2026-04-22T00:00:00","Subscribed":"2024-04-10T19:13:34.807Z","Status":"Client","Source":"Website (Direct)","AdditionalUsers": 10,"AdditionalUsersCost": 100.0000,"SKUs": [{"Name": "Standard Yearly 2021","Quantity": 2,"Total": 1200.0000,"Frequency": "Yearly"}],"SalesPersonEmail":"indeewari.k@dearsystems.com","SalesGMV6Months":437.0000,"SalesGMV3Months":437.0000,"SalesGMV12Months":437.0000,"SalesGMV":437.0000,"SalesCount":1,"Sales6MonthsCount":1,"Sales3MonthsCount":1,"Sales12MonthsCount":1,"ReferrerDomain":null,"ReferredByPartnerId":null,"ReferredByPartner":null,"PlanType":null,"PartnerType":null,"Organisation":"Andrew Trial","LastUpdatedDate":"2024-12-07T21:20:21.370Z","IsVarPartner":"false","IsOnboardingOptional":null,"IsNeedAttention":false,"IntegrationCount":0,"Email":"andrew.cooper@cin7.com","Discounts":[],"Discount":50.0000,"CustomerDomain":"cin7.com","CreateDate":"2023-07-14T15:55:51.453Z","Country":"United States","Contacts":[{"Phone":"90909099099","LastName":"Cooper","FirstName":"Andrew","Email":"andrew.cooper@cin7.com"}],"Cancelled":null,"AnniversaryDate":"2025-04-09T00:00:00"}}';
+        String getResponse = '{"Errors":null,"Data":{"WebsiteURL":null,"Utm_Term":null,"Utm_Source":null,"Utm_Medium":null,"Utm_Content":null,"Utm_Campaign":null,"Users":[],"TenantID":"f23932f1-54eb-4bfe-b929-b25fb029056d","SubscriptionName":"Pro 2024.01","SubscriptionExpirationDate":"2026-04-22T00:00:00","Subscribed":"2024-04-10T19:13:34.807Z","Status":"Client","Source":"Website (Direct)","AdditionalUsers": 10,"AdditionalUsersCost": 100.0000,"SKUs": [{"Name": "Standard Yearly 2021","Quantity": 2,"Total": 1200.0000,"Frequency": "Yearly"}],"SalesPersonEmail":"indeewari.k@dearsystems.com","SalesGMV6Months":437.0000,"SalesGMV3Months":437.0000,"SalesGMV12Months":437.0000,"SalesGMV":437.0000,"SalesCount":1,"Sales6MonthsCount":1,"Sales3MonthsCount":1,"Sales12MonthsCount":1,"ReferrerDomain":null,"ReferredByPartnerId":null,"ReferredByPartner":null,"PlanType":null,"PartnerType":null,"Organisation":"Andrew Trial","LastUpdatedDate":"2024-12-07T21:20:21.370Z","IsVarPartner":"false","IsOnboardingOptional":null,"IsNeedAttention":false,"IntegrationCount":0,"Email":"andrew.cooper@cin7.com","Discounts":[],"Discount":50.0000,"CustomerDomain":"cin7.com","CreateDate":"2023-07-14T15:55:51.453Z","Country":"United States","Contacts":[{"Phone":"90909099099","LastName":"Cooper","FirstName":"Andrew","Email":"andrew.cooper@cin7.com"}],"Cancelled":null,"AnniversaryDate":"2025-04-09T00:00:00"}}';
         MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
         MockHttpResponseHandler mock = new MockHttpResponseHandler();
         mock.addResponse('callout:Customer_Details', getResp);
@@ -307,7 +307,7 @@ public with sharing class IncomingReqDiscountChangeTest {
         Test.startTest();
 
         Test.setMock(HttpCalloutMock.class, mock);
-        Database.executeBatch(new IncomingReqDiscountChangeBatch(new List<Incoming_Request__c>{req}));
+        Database.executeBatch(new IncomingReqUpdateSubscriptionBatch(new List<Incoming_Request__c>{req}));
 
         Test.stopTest();
         
@@ -359,7 +359,7 @@ public with sharing class IncomingReqDiscountChangeTest {
         req.Tenant_ID__c = 'b12294de-e20c-4dc6-8772-416a5c5f5247';
 
         // assign
-        String getResponse = '{"Data":{"Subscribed": "2022-09-28T3:02:26.457","Cancelled": null,"SubscriptionName": "Standard Yearly 2021","SubscriptionExpirationDate": "2023-10-27T00:00:00","Source": "Partner Referral","ReferredByPartner": "Test","ReferredByPartnerId": "477a126d-e6b3-483f-b223-8c5655bebc9a","PlanType": "standard","IsNeedAttention": true,"CustomerDomain": "Yashodha","Utm_Campaign": null,"Utm_Source": null,"Utm_Medium": null,"Utm_Term": null,"Utm_Content": null,"PartnerType": null,"IsVarPartner": false,"ReferrerDomain": null,"AdditionalUsers": 10,"AdditionalUsersCost": 100.0000,"SKUs": [{"Name": "Pro 2023","Quantity": 1,"Total": 1000.00,"Frequency": "Monthly"},{"Name": "Standard Yearly 2021","Quantity": 1,"Total": 100.00,"Frequency": "Yearly"}],"Country": "Australia","CreateDate": "2022-09-28T12:57:05.767","Email": "ep@dearsystems.com","LastUpdatedDate": null,"Organisation": "Test Var Client 1","SalesPersonEmail": "ele@gmail.com","TenantID": "b12294de-e20c-4dc6-8772-416a5c5f5246","WebsiteURL": "mail.com","Contacts":[{"Phone": "561526","Email": "p.p@dearsystems.com","FirstName": "DEFAULT","LastName": "business contact"}], "Users": [{"UserId": "765f9151-cf0d-439f-8811-b248080fdc31","Email": "bshaw@whitecaps.com","UserType": "owner","DisplayName": "Brendan Shaw"}]}}';
+        String getResponse = '{"Data":{"Subscribed": "2022-09-28T3:02:26.457","Cancelled": null,"SubscriptionName": "Standard Yearly 2021","SubscriptionExpirationDate": "2023-10-27T00:00:00","Source": "Partner Referral","ReferredByPartner": "Test","ReferredByPartnerId": "477a126d-e6b3-483f-b223-8c5655bebc9a","PlanType": "standard","IsNeedAttention": true,"CustomerDomain": "Yashodha","Utm_Campaign": null,"Utm_Source": null,"Utm_Medium": null,"Utm_Term": null,"Utm_Content": null,"PartnerType": null,"IsVarPartner": false,"ReferrerDomain": null,"AdditionalUsers": 10,"AdditionalUsersCost": 100.0000,"SKUs": [{"Name": "Pro 2023","Quantity": 1,"Total": 1000.00,"Frequency": "Monthly"},{"Name": "Standard Yearly 2021","Quantity": 1,"Total": 100.00,"Frequency": "Yearly"}],"Country": "Australia","CreateDate": "2022-09-28T12:57:05.767","Email": "ep@dearsystems.com","LastUpdatedDate": null,"Organisation": "Test Var Client 1","SalesPersonEmail": "ele@gmail.com","TenantID": "b12294de-e20c-4dc6-8772-416a5c5f5246","WebsiteURL": "mail.com","Contacts":[{"Phone": "561526","Email": "p.p@dearsystems.com","FirstName": "DEFAULT","LastName": "business contact"}], "Users": []}}';
         MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
         MockHttpResponseHandler mock = new MockHttpResponseHandler();
         mock.addResponse('callout:Customer_Details', getResp);
@@ -369,7 +369,7 @@ public with sharing class IncomingReqDiscountChangeTest {
 
         Test.startTest();
             Test.setMock(HttpCalloutMock.class, mock);
-            Database.executeBatch(new IncomingReqDiscountChangeBatch(new List<Incoming_Request__c>{req}));
+            Database.executeBatch(new IncomingReqUpdateSubscriptionBatch(new List<Incoming_Request__c>{req}));
         Test.stopTest();
         Opportunity newOpp = [SELECT Name,Amount FROM Opportunity WHERE DEAR_Tenant_ID__c = 'b12294de-e20c-4dc6-8772-416a5c5f5247' AND Is_Active__c = true LIMIT 1];
 
@@ -396,7 +396,7 @@ public with sharing class IncomingReqDiscountChangeTest {
 
         Test.startTest();
             Test.setMock(HttpCalloutMock.class, mock);
-            Database.executeBatch(new IncomingReqDiscountChangeBatch(new List<Incoming_Request__c>{req}));
+            Database.executeBatch(new IncomingReqUpdateSubscriptionBatch(new List<Incoming_Request__c>{req}));
         Test.stopTest();
 
         Assert.areEqual(2, [SELECT COUNT() FROM Opportunity]);

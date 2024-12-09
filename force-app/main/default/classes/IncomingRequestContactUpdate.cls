@@ -8,7 +8,7 @@ public class IncomingRequestContactUpdate {
 
     void processContactUpdateReqs(List<Incoming_Request__c> incomingRequests) {
         List<API_Error_Log__c> apiErrorLogsToInsert = new List<API_Error_Log__c>();
-
+        System.debug('entering contact update method');
         for (Incoming_Request__c ir : incomingRequests)
         {
             HttpResponse response = IncomingRequestHelper.GetCoreCustomerDetails(ir.Tenant_Id__c);
@@ -17,7 +17,7 @@ public class IncomingRequestContactUpdate {
 
             // Parse into wrapper
             IncomingRequestJSONParse jsonResp = IncomingRequestJSONParse.parse(response.getBody());
-            System.debug('ContactUpdate response: ' + JSON.serializePretty(jsonResp));
+            System.debug('ContactUpdate response: ' + JSON.serialize(jsonResp));
 
             // Iterate response wrapper
             if (jsonResp.Errors == null)
