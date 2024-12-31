@@ -273,28 +273,18 @@ public with sharing class IncomingReqNewSubscriptionBatch implements Database.Ba
                     }
                     
                     catch(QueryException error){
-                        API_Error_Log__c err = new API_Error_Log__c();
-                        err.Error_Message__c = 'System.QueryException: ' + error.getMessage();
-                        err.Status__c = 'Lead Converted or Not Found';
-                        insertAPIErrorLogs.add(err);
+                        insertAPIErrorLogs.add(new API_Error_Log__c(Error_Message__c = 'System.QueryException: ' + error.getMessage(), Status__c = 'Lead Converted or Not Found'));
                     }
                     
                 }
                 //MB added 20230501
                 catch(Exception e) {
-                    API_Error_Log__c err = new API_Error_Log__c();
-                    err.Error_Message__c = e.getStackTraceString() + ' ||| ' +e.getMessage();
-                    err.Status__c = 'System.Exception';
-                    insertAPIErrorLogs.add(err);
+                    insertAPIErrorLogs.add(new API_Error_Log__c(Error_Message__c = e.getStackTraceString() + ' ||| ' +e.getMessage(), Status__c = 'System.Exception'));
                 }
             }
             else{
                 System.debug('Something went wrong when fetching customer details...');
-                API_Error_Log__c newError = new API_Error_Log__c();
-                newError.Error_Message__c = String.join(jsonResp.Errors, ',');
-                newError.HTTP_Status_Code__c = resp.getStatusCode();
-                newError.Status__c = resp.getStatus();
-                insertAPIErrorLogs.add(newError);
+                insertAPIErrorLogs.add(IncomingRequestHelper.LogResponseError(jsonResp, resp));
             }
         }
 
@@ -302,11 +292,7 @@ public with sharing class IncomingReqNewSubscriptionBatch implements Database.Ba
         Integer oliIdx = 0;
         for(Database.SaveResult sr : oliResults) {
             if(!sr.isSuccess()) {
-                IncomingRequestJSONParse.SKUs sku = newSkuList.size() > oliIdx ? newSkuList[oliIdx] : null;
-                API_Error_Log__c newError = new API_Error_Log__c();
-                newError.Error_Message__c = sr.getErrors() + '. Product attributes: ' + JSON.serialize(sku);
-                
-                insertAPIErrorLogs.add(newError);
+                insertAPIErrorLogs.add(new API_Error_Log__c(Error_Message__c = sr.getErrors() + '. Product attributes: ' + JSON.serialize(newSkuList.size() > oliIdx ? newSkuList[oliIdx] : null)));
             }
             oliIdx++;
         }
@@ -315,11 +301,7 @@ public with sharing class IncomingReqNewSubscriptionBatch implements Database.Ba
         Integer uOliIdx = 0;
         for(Database.SaveResult sr : updateOliResults) {
             if(!sr.isSuccess()) {
-                IncomingRequestJSONParse.SKUs sku = updateSkuList.size() > uOliIdx ? updateSkuList[uOliIdx] : null;
-                API_Error_Log__c newError = new API_Error_Log__c();
-                newError.Error_Message__c = sr.getErrors() + '. Product attributes: ' + JSON.serialize(sku);
-                
-                insertAPIErrorLogs.add(newError);
+                insertAPIErrorLogs.add(new API_Error_Log__c(Error_Message__c = sr.getErrors() + '. Product attributes: ' + JSON.serialize(updateSkuList.size() > uOliIdx ? updateSkuList[uOliIdx] : null)));
             }
             uOliIdx++;
         }

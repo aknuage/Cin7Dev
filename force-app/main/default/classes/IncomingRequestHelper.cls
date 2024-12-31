@@ -71,7 +71,7 @@ public with sharing class IncomingRequestHelper
             Core_Amount__c = sku.Total,
             Billing_Frequency__c = sku.Frequency == 'onetime' ? null : sku.Frequency
         );
-
+        System.debug('oli in req helper: ' + JSON.serializePretty(oli));
         return oli;
     }
 
@@ -183,6 +183,11 @@ public with sharing class IncomingRequestHelper
     //     userSku.Total = jsonResp.Data.AdditionalUsersCost;
     //     return userSku;
     // }
+
+    public static String normalizeTenantId(String tenantId)
+    {
+        return tenantId.toUpperCase();
+    }
 
     /**
      * Retrieves a map of PriceBookEntry Ids keyed by ProductCode, filtering by standard pricebook.
@@ -325,33 +330,43 @@ public with sharing class IncomingRequestHelper
      * @return - True if a new Opportunity should be created; otherwise, false.
      * @author - akelly @ NuAge : CIN7-112 : December 2024
     */
-    public static Boolean ShouldCreateOpp(IncomingRequestJsonParse.SKUs sku, Opportunity oldOpp)
-    {
-            Boolean skuFound = false;
-            Boolean createNewOpp = false;
-            for (OpportunityLineItem oldOli : oldOpp.OpportunityLineItems)
-            {   
-                // Does this SKU exist in the prior opp?
-                if (oldOli.PriceBookEntry.ProductCode == sku.Name) {
-                    skuFound = true;
+    public static Boolean ShouldCreateOpp(
+        Boolean createNewOpp, 
+        Opportunity oldOpp, 
+        IncomingRequestJSONParse.SKUs sku
+    ) {
+        if (createNewOpp) return true; // Skip analysis if already creating a new Opportunity
 
-                    // Do quantities match? If not, we need a new opp
-                    if (oldOli.Quantity != sku.Quantity) {
-                        createNewOpp = true;
-                        continue;
-                    } 
+        Boolean skuFound = false;
 
-                    // Do the amounts match? If not, we need a new opp
-                    if (oldOli.UnitPrice != IncomingRequestHelper.calculateUnitPriceForCoreSku(sku)) {
-                        createNewOpp = true;
-                        continue;
-                    }
+        for (OpportunityLineItem oldOli : oldOpp.OpportunityLineItems) {
+            System.debug('try matching old oli');
+
+            // Check if SKU exists in the prior opportunity
+            if (oldOli.PriceBookEntry.ProductCode == sku.Name) {
+                System.debug('found matching sku');
+                skuFound = true;
+
+                // Check if quantities match
+                if (oldOli.Quantity != sku.Quantity) {
+                    System.debug('Quantities don\'t match');
+                    return true; // New Opp needed
+                }
+
+                // Check if amounts match
+                if (oldOli.UnitPrice != IncomingRequestHelper.calculateUnitPriceForCoreSku(sku)) {
+                    System.debug('Amounts don\'t match');
+                    return true; // New Opp needed
                 }
             }
-            // If we didn't find matching sku, create new opportunity
-            if (!skuFound) createNewOpp = true;
+        }
 
-            return createNewOpp;
+        // If no matching SKU was found, a new Opportunity is needed
+        if (!skuFound) {
+            return true; // New Opp needed
+        }
+
+        return false; // No new Opportunity needed
     }
 
 }

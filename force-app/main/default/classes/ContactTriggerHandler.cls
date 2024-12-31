@@ -82,7 +82,7 @@ public with sharing class ContactTriggerHandler
             }
             else if (Trigger.isUpdate)
             {
-                if (String.isNotBlank(c.AccountId) && c.AccountId != oldMap.get(c.Id).AccountId) 
+                if (String.isNotBlank(c.AccountId) && (c.AccountId != oldMap.get(c.Id).AccountId)) 
                 {
                     qualifiedContacts.add(c);
                     accountIds.add(c.AccountId);

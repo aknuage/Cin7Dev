@@ -118,120 +118,7 @@ public with sharing class IncomingReqDiscountChangeTest {
         Test.stopTest();
     }
 
-    @isTest
-    public static void testUpsellDownsell()
-    {
-        // Assemble
-        Opportunity opp = [SELECT StageName, OwnerId FROM Opportunity WHERE Name = 'Test Opp' LIMIT 1];
-        opp.StageName = 'Closed Won';
-        update opp;
-
-        Incoming_Request__c req = new Incoming_Request__c();
-        req.Source__c = 'Cin7 Core';
-        req.Message__c = 'UpdateSubscription';
-        req.Tenant_ID__c = 'b12294de-e20c-4dc6-8772-416a5c5f5246';
-
-        String getResponse = '{"Data":{"Subscribed": "2022-09-28T13:02:26.457","Cancelled": null,"SubscriptionName": "Standard Yearly 2021","SubscriptionExpirationDate": "2023-10-27T00:00:00","Source": "Partner Referral","ReferredByPartner": "Test","ReferredByPartnerId": "477a126d-e6b3-483f-b223-8c5655bebc9a","PlanType": "standard","IsNeedAttention": true,"CustomerDomain": "Yashodha","Utm_Campaign": null,"Utm_Source": null,"Utm_Medium": null,"Utm_Term": null,"Utm_Content": null,"PartnerType": null,"IsVarPartner": false,"ReferrerDomain": null,"AdditionalUsers": 10,"AdditionalUsersCost": 100,"SKUs": [{"Name": "Pro 2023","Quantity": 1,"Total": 1000.00,"Frequency": "Monthly"},{"Name": "Standard Yearly 2021","Quantity": 2,"Total": 200.00,"Frequency": "Yearly"}],"Country": "Australia","CreateDate": "2022-09-28T12:57:05.767","Email": "ep@dearsystems.com","LastUpdatedDate": null,"Organisation": "Test Var Client 1","SalesPersonEmail": "ele@gmail.com","TenantID": "b12294de-e20c-4dc6-8772-416a5c5f5246","WebsiteURL": "mail.com","Contacts":[{"Phone": "561526","Email": "p.p@dearsystems.com","FirstName": "DEFAULT","LastName": "business contact"}], "Users": [{"UserId": "765f9151-cf0d-439f-8811-b248080fdc31","Email": "bshaw@whitecaps.com","UserType": "owner","DisplayName": "Brendan Shaw"}]}}';
-        MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
-        MockHttpResponseHandler mock = new MockHttpResponseHandler();
-        mock.addResponse('callout:Customer_Details', getResp);
-
-        Assert.areEqual(2, [SELECT COUNT() FROM Opportunity]);
-
-        // Act
-        Test.startTest();
-            Test.setMock(HttpCalloutMock.class, mock);
-            insert req;
-        Test.stopTest();
-
-        // Assert
-        List<Opportunity> oppAssert = [SELECT Name, OwnerId, Is_Active__c, Dear_Tenant_Id__c, 
-                (select Id, UnitPrice, Quantity, PricebookEntry.ProductCode, Billing_Frequency__c from OpportunityLineItems)
-                FROM Opportunity WHERE Name = 'Test Opp' and StageName = 'Closed Won'];
-        Assert.areEqual(2, oppAssert.size());
-
-        Boolean foundNewOpp = false;
-        Integer activeOppsCount = 0;
-        Boolean matchedOwnerId = false;
-        Boolean foundOriginalOpp = false;
-        Boolean foundPro2023 = false;
-        Boolean foundYearly2021 = false;
-        Boolean foundUsers = false;
-        for (Opportunity o : oppAssert)
-        {
-            assert.areEqual('b12294de-e20c-4dc6-8772-416a5c5f5246', o.Dear_Tenant_Id__c);
-
-            if (o.Is_Active__c)
-            {
-                activeOppsCount++;
-                assert.areEqual(3, o.OpportunityLineItems.size());
-                foundNewOpp = true;
-                assert.areEqual(opp.OwnerId, o.OwnerId);
-                matchedOwnerId = true;
-
-                for (OpportunityLineItem oli : o.OpportunityLineItems)
-                {
-                    if (oli.PricebookEntry.ProductCode == 'Pro 2023')
-                    {
-                        assert.areEqual(1, oli.Quantity);
-                        assert.areEqual(1000, oli.UnitPrice);
-                        foundPro2023 = true;
-                    }
-                    else if (oli.PricebookEntry.ProductCode == 'Standard Yearly 2021')
-                    {
-                        assert.areEqual(2, oli.Quantity);
-                        Decimal up = 100/12;
-                        up = up.setScale(2);
-                        assert.areEqual(8.33, oli.UnitPrice);
-                        foundYearly2021 = true;
-                    }
-                    else if (oli.PricebookEntry.ProductCode == 'Users')
-                    {
-                        assert.areEqual(10, oli.Quantity);
-                        assert.areEqual(10, oli.UnitPrice);
-                        assert.areEqual('Monthly', oli.Billing_Frequency__c);
-                        foundUsers = true;
-                    }
-                }
-            }
-            else
-            {
-                // assert # opp lines didn't change and that they're as they were
-                assert.areEqual(2, o.OpportunityLineItems.size());
-                
-                Boolean foundOrigUsers = false;
-                Boolean foundOrigYearly2021 = false;
-                for (OpportunityLineItem oli : o.OpportunityLineItems)
-                {
-                    if (oli.PricebookEntry.ProductCode == 'Standard Yearly 2021')
-                    {
-                        assert.areEqual(10, oli.Quantity);
-                        assert.areEqual(100, oli.UnitPrice);
-                        foundOrigYearly2021 = true;
-                    }
-                    else if (oli.PricebookEntry.ProductCode == 'Users')
-                    {
-                        assert.areEqual(1, oli.Quantity);
-                        assert.areEqual(50, oli.UnitPrice);
-                        foundOrigUsers = true;
-                    }
-                }
-                assert.isTrue(foundOrigYearly2021);
-                assert.isTrue(foundOrigUsers);
-                foundOriginalOpp = true;
-            }
-                
-        }
-        Assert.areEqual(1, activeOppsCount);
-        Assert.isTrue(foundnewOpp);
-        Assert.isTrue(matchedOwnerId);
-        Assert.isTrue(foundOriginalOpp);
-        Assert.isTrue(FoundPro2023);
-        Assert.isTrue(foundYearly2021);
-        Assert.isTrue(foundUsers);
-    }
-
-    // Test method used to test when a "DiscountChange" Incoming Request message is submitted after the account is signed up, and so does create a new Upsell/Downsell opp.
+        // Test method used to test when a "DiscountChange" Incoming Request message is submitted after the account is signed up, and so does create a new Upsell/Downsell opp.
     @isTest
     public static void testDiscountChangeHappyPath() {
         // Prepare pricebook and product setup
@@ -347,6 +234,119 @@ public with sharing class IncomingReqDiscountChangeTest {
         // Account Name should not change even if Organization is passed as a param in the response
         System.assertEquals('Nuage Test', [SELECT Name FROM Account WHERE DEAR_Tenant_ID__c = :tenantId LIMIT 1].Name, 'Account name should remain unchanged.');
         
+    }
+
+    @isTest
+    public static void testUpsellDownsell()
+    {
+        // Assemble
+        Opportunity opp = [SELECT StageName, OwnerId FROM Opportunity WHERE Name = 'Test Opp' LIMIT 1];
+        opp.StageName = 'Closed Won';
+        update opp;
+
+        Incoming_Request__c req = new Incoming_Request__c();
+        req.Source__c = 'Cin7 Core';
+        req.Message__c = 'UpdateSubscription';
+        req.Tenant_ID__c = 'b12294de-e20c-4dc6-8772-416a5c5f5246';
+
+        String getResponse = '{"Data":{"Subscribed": "2022-09-28T13:02:26.457","Cancelled": null,"SubscriptionName": "Standard Yearly 2021","SubscriptionExpirationDate": "2023-10-27T00:00:00","Source": "Partner Referral","ReferredByPartner": "Test","ReferredByPartnerId": "477a126d-e6b3-483f-b223-8c5655bebc9a","PlanType": "standard","IsNeedAttention": true,"CustomerDomain": "Yashodha","Utm_Campaign": null,"Utm_Source": null,"Utm_Medium": null,"Utm_Term": null,"Utm_Content": null,"PartnerType": null,"IsVarPartner": false,"ReferrerDomain": null,"AdditionalUsers": 10,"AdditionalUsersCost": 100,"SKUs": [{"Name": "Pro 2023","Quantity": 1,"Total": 1000.00,"Frequency": "Monthly"},{"Name": "Standard Yearly 2021","Quantity": 2,"Total": 200.00,"Frequency": "Yearly"}],"Country": "Australia","CreateDate": "2022-09-28T12:57:05.767","Email": "ep@dearsystems.com","LastUpdatedDate": null,"Organisation": "Test Var Client 1","SalesPersonEmail": "ele@gmail.com","TenantID": "b12294de-e20c-4dc6-8772-416a5c5f5246","WebsiteURL": "mail.com","Contacts":[{"Phone": "561526","Email": "p.p@dearsystems.com","FirstName": "DEFAULT","LastName": "business contact"}], "Users": [{"UserId": "765f9151-cf0d-439f-8811-b248080fdc31","Email": "bshaw@whitecaps.com","UserType": "owner","DisplayName": "Brendan Shaw"}]}}';
+        MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
+        MockHttpResponseHandler mock = new MockHttpResponseHandler();
+        mock.addResponse('callout:Customer_Details', getResp);
+
+        Assert.areEqual(2, [SELECT COUNT() FROM Opportunity]);
+
+        // Act
+        Test.startTest();
+            Test.setMock(HttpCalloutMock.class, mock);
+            insert req;
+        Test.stopTest();
+
+        // Assert
+        List<Opportunity> oppAssert = [SELECT Name, OwnerId, Is_Active__c, Dear_Tenant_Id__c, 
+                (select Id, UnitPrice, Quantity, PricebookEntry.ProductCode, Billing_Frequency__c from OpportunityLineItems)
+                FROM Opportunity WHERE Name = 'Test Opp' and StageName = 'Closed Won'];
+        Assert.areEqual(2, oppAssert.size());
+
+        Boolean foundNewOpp = false;
+        Integer activeOppsCount = 0;
+        Boolean matchedOwnerId = false;
+        Boolean foundOriginalOpp = false;
+        Boolean foundPro2023 = false;
+        Boolean foundYearly2021 = false;
+        Boolean foundUsers = false;
+        for (Opportunity o : oppAssert)
+        {
+            assert.areEqual('b12294de-e20c-4dc6-8772-416a5c5f5246', o.Dear_Tenant_Id__c);
+
+            if (o.Is_Active__c)
+            {
+                activeOppsCount++;
+                assert.areEqual(3, o.OpportunityLineItems.size());
+                foundNewOpp = true;
+                assert.areEqual(opp.OwnerId, o.OwnerId);
+                matchedOwnerId = true;
+
+                for (OpportunityLineItem oli : o.OpportunityLineItems)
+                {
+                    if (oli.PricebookEntry.ProductCode == 'Pro 2023')
+                    {
+                        assert.areEqual(1, oli.Quantity);
+                        assert.areEqual(1000, oli.UnitPrice);
+                        foundPro2023 = true;
+                    }
+                    else if (oli.PricebookEntry.ProductCode == 'Standard Yearly 2021')
+                    {
+                        assert.areEqual(2, oli.Quantity);
+                        Decimal up = 100/12;
+                        up = up.setScale(2);
+                        assert.areEqual(8.33, oli.UnitPrice);
+                        foundYearly2021 = true;
+                    }
+                    else if (oli.PricebookEntry.ProductCode == 'Users')
+                    {
+                        assert.areEqual(10, oli.Quantity);
+                        assert.areEqual(10, oli.UnitPrice);
+                        assert.areEqual('Monthly', oli.Billing_Frequency__c);
+                        foundUsers = true;
+                    }
+                }
+            }
+            else
+            {
+                // assert # opp lines didn't change and that they're as they were
+                assert.areEqual(2, o.OpportunityLineItems.size());
+                
+                Boolean foundOrigUsers = false;
+                Boolean foundOrigYearly2021 = false;
+                for (OpportunityLineItem oli : o.OpportunityLineItems)
+                {
+                    if (oli.PricebookEntry.ProductCode == 'Standard Yearly 2021')
+                    {
+                        assert.areEqual(10, oli.Quantity);
+                        assert.areEqual(100, oli.UnitPrice);
+                        foundOrigYearly2021 = true;
+                    }
+                    else if (oli.PricebookEntry.ProductCode == 'Users')
+                    {
+                        assert.areEqual(1, oli.Quantity);
+                        assert.areEqual(50, oli.UnitPrice);
+                        foundOrigUsers = true;
+                    }
+                }
+                assert.isTrue(foundOrigYearly2021);
+                assert.isTrue(foundOrigUsers);
+                foundOriginalOpp = true;
+            }
+                
+        }
+        Assert.areEqual(1, activeOppsCount);
+        Assert.isTrue(foundnewOpp);
+        Assert.isTrue(matchedOwnerId);
+        Assert.isTrue(foundOriginalOpp);
+        Assert.isTrue(FoundPro2023);
+        Assert.isTrue(foundYearly2021);
+        Assert.isTrue(foundUsers);
     }
 
     // Test method used to ensure that the upsell Opportunity record type is only created if there is a legit upsell

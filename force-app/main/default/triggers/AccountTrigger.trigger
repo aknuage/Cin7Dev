@@ -10,6 +10,7 @@ trigger AccountTrigger on Account (before insert, before update, before delete, 
 
         when BEFORE_UPDATE {
             AccountTriggerHandler.checkAccountPartnerStatus(Trigger.newMap,Trigger.oldMap);
+            AccountTriggerHandler.updatePartnerAccountProvisioning();
         } 
         when AFTER_UPDATE {
             AccountTriggerHandler.ProcessAccountForNorthpass(Trigger.newMap, Trigger.oldMap);

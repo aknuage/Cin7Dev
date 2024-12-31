@@ -1,7 +1,10 @@
 @isTest
 public with sharing class IncomingReqCancelSubscriptionBatchTest {
 
-   
+    /**
+     * End to end test of creating an Account, Pricebook, Opportunity with line items.
+     * Then creates a Cancel_Subscription req and inserts, verifying results at the end.
+     */
     @isTest
     static void testSubscriptionCancellation()
     {
@@ -16,13 +19,14 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
         Pricebook2 standardPricebook = new Pricebook2(Id = pricebookId,IsActive = true);
         update standardPricebook;
 
-        Id coreNewSalesRtId = Schema.SObjectType.Opportunity.getRecordTypeInfosByName().get('Core New Sales').getRecordTypeId();
+        Id coreUpsellDownsellRtId = [select Id, Name from RecordType where sObjectType='Opportunity' and RecordType.Name = 'Core Upgrade/Downgrade' LIMIT 1].Id;
+        
         Opportunity o = new Opportunity(
             Name = 'CIN7-90 Test Opp',
             AccountId = a.Id,
             Dear_Tenant_Id__c = a.Dear_Tenant_Id__c,
             CloseDate = Date.today(),
-            RecordTypeId = coreNewSalesRtId,
+            // RecordTypeId = coreUpsellDownsellRtId,
             Pricebook2Id = standardPricebook.Id,
             Is_Active__c = true,
             Amount = 1000,
@@ -100,7 +104,8 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
         Assert.areEqual('Closed Won',[SELECT StageName FROM Opportunity WHERE Id = :o.Id].StageName);
 
         String expDateString = Date.today().addMonths(6).toString();
-        String getResponse = '{"Data":{"TenantID":"cin790", "SubscriptionExpirationDate":"' + expDateString + '", "Organisation":"' + a.Name + '"}}';
+        // String cancelledDatetimeString = Datetime.valueOf(expDateString).toString();
+        String getResponse = '{"Data":{"TenantID":"cin790", "Cancelled":"2025-10-28T13:02:26.457", "Status" : "", "SubscriptionExpirationDate":"' + expDateString + '", "Organisation":"' + a.Name + '"}}';
         MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
         MockHttpResponseHandler mock = new MockHttpResponseHandler();
         mock.addResponse('callout:Customer_Details', getResp);
@@ -111,9 +116,19 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
         Test.stopTest();
 
         // Assert
-        List<Opportunity> assertOpps = [SELECT Id, Name, AccountId, Dear_Tenant_Id__c, CloseDate, RecordTypeId, Pricebook2Id, 
-                Is_Active__c, Amount, StageName, (select Quantity, UnitPrice, TotalPrice, PricebookEntryId from OpportunityLineItems) 
+        List<Opportunity> assertOpps = [SELECT Id, Name, AccountId, Dear_Tenant_Id__c, CloseDate, RecordTypeId, Pricebook2Id, OwnerId, 
+                Is_Active__c, Amount, Parent_Opportunity__c, StageName, (select Quantity, UnitPrice, TotalPrice, PricebookEntryId from OpportunityLineItems) 
             FROM Opportunity WHERE Name LIKE '%CIN7-90%'];
+
+        Opportunity clonedOpp;
+        Opportunity originalOpp;
+        Account assertAcc = [SELECT Id, DEAR_Tenant_ID__c, DEAR_CRM_Status__c, Core_Last_Updated_Date__c, Subscription_Expiration_Date__c, Core_Cancelled_Date__c FROM Account WHERE Id = :a.Id LIMIT 1];
+
+        // Assert that Account properly updated
+        Assert.areEqual(null, assertAcc.DEAR_CRM_Status__c);
+        Assert.areEqual(Date.today().addMonths(6), assertAcc.Subscription_Expiration_Date__c);
+        Assert.areEqual('2025-10-28 07:02:26', String.valueOf(assertAcc.Core_Cancelled_Date__c));
+
 
         Assert.areEqual(2, assertOpps.size());
         Boolean foundOppOriginal = false;
@@ -127,12 +142,13 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
             Assert.areEqual(a.Id, assertOpp.AccountId);
             Assert.areEqual('cin790', assertOpp.Dear_Tenant_Id__c);
             Assert.areEqual(Date.today(), assertOpp.CloseDate);
-            Assert.areEqual(o.RecordTypeId, assertOpp.RecordTypeId);
             // The old, cloned opp should be deactivated
             if (assertOpp.Name.contains('Cancel')) {
                 Assert.isTrue(assertOpp.Is_Active__c);
+                clonedOpp = assertOpp;
             } else {
-                Assert.isTrue(!assertOpp.Is_Active__c);
+                Assert.isFalse(assertOpp.Is_Active__c);
+                originalOpp = assertOpp;
             }
 
             if (assertOpp.Id == o.Id)
@@ -148,11 +164,13 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
                     Assert.areEqual(oli.UnitPrice * oli.Quantity, oli.TotalPrice);
                     Assert.isNotNull(oli.PricebookEntryId);
                     foundOppLinesOriginal = true;
-                }   
+                }
             }
             else
             {
                 Assert.areEqual(0, assertOpp.Amount);
+                // Parent Opp will be set for all clones
+                System.assertNotEquals(null, assertOpp.Parent_Opportunity__c);
                 Assert.areEqual(o.Name + ' - Cancellation', assertOpp.Name);
                 foundOppClone = true;
                 Assert.areEqual(3, assertOpp.OpportunityLineItems.size());
@@ -168,9 +186,12 @@ public with sharing class IncomingReqCancelSubscriptionBatchTest {
                 }
             }
         }
-        Assert.isTrue(foundOppOriginal);
-        Assert.isTrue(foundOppLinesOriginal);
+        Assert.areEqual(originalOpp.OwnerId, clonedOpp.OwnerId);
+        Assert.areEqual(clonedOpp.RecordTypeId, coreUpsellDownsellRtId);
+
         Assert.isTrue(foundOppClone);
+        Assert.isTrue(foundOppOriginal);
         Assert.isTrue(foundOppLinesClone);
+        Assert.isTrue(foundOppLinesOriginal);
     }
 }

@@ -24,7 +24,7 @@ public with sharing class IncomingRequestQueueable implements Queueable,Database
 		{
 			when NewSubscription 
 			{ 
-				// Database.executeBatch(new IncomingRequestBatchable(this.incomingRequests), 30);
+				// Current test coverage: 76% - akelly @ NuAge : 12/9/2024
 				Database.executeBatch(new IncomingReqNewSubscriptionBatch(this.incomingRequests), 30);
 			}
 			when UpdateSubscription 
@@ -41,10 +41,10 @@ public with sharing class IncomingRequestQueueable implements Queueable,Database
 			when ContactUpdate 
 			{
 				// Current test coverage: 100% - akelly @ NuAge : 12/8/24
-				new IncomingRequestContactUpdate(this.incomingRequests);
+				new IncomingReqContactUpdateQueueable(this.incomingRequests);
 			}
 			when RenewalSubscription { 
-				 // Database.executeBatch(new IncomingRequestBatchableNewOpp(this.incomingRequests), 30);
+				// Current test coverage: 96% - akelly @ NuAge : 12/9/24
 				Database.executeBatch(new IncomingReqRenewalSubscriptionBatch(this.incomingRequests), 30); 
 			}
 			when CancelSubscription { 

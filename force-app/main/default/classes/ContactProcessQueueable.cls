@@ -51,7 +51,7 @@ public with sharing class ContactProcessQueueable implements Queueable
             Contact matchingContact;
             for (Contact c : matchingContacts)
             {
-                System.debug('matching contact? : ' + JSON.serializePretty(c));
+                System.debug('matching contact? : ' + c.Name);
                 // Did we match on Email only? If so, update the Cin7 Core User Id
                 if (String.isBlank(c.Cin7_Core_User_Id__c) && c.Email == u.Email)
                 {
@@ -90,6 +90,7 @@ public with sharing class ContactProcessQueueable implements Queueable
             // If we didn't find a matching Contact create a new contact and associate it to this Account (which will auto-create an Account Contact Relationship)
             if (matchingContact == null)
             {
+                System.debug('non matching contact: ' + u.DisplayName);
                 Contact newContact = new Contact(
                     FirstName = u.DisplayName.substringBefore(' '),
                     LastName = setDefaultNameIfBlank( u.DisplayName.substringAfter(' ')),
@@ -199,6 +200,7 @@ public with sharing class ContactProcessQueueable implements Queueable
                         el.Error_Message__c = msg;
                     }
                     errLog.add(el);
+                    System.debug('Error in Contact Process Queueable: ' + JSON.serializePretty(el));
                 }
             }
 

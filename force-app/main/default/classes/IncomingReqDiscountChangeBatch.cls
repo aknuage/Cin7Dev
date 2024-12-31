@@ -56,17 +56,18 @@ global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObj
 
                         if (createNewOpp) continue; // Skip SKU analysis, already creating Opp
 
-                        createNewOpp = IncomingRequestHelper.ShouldCreateOpp(sku, oldOpp);
+                        // Call the utility method
+                        createNewOpp = IncomingRequestHelper.ShouldCreateOpp(createNewOpp, oldOpp, sku);
                         System.debug('create new opp? ' + createNewOpp);
 
-                        // If we're not creating a new opp it's because all SKUs match the lines of the existing opp. Remove the provisional opp lines we created
-                        if (!createNewOpp && oppLinesToInsertByRequestId.get(ir.Id) != null) {
-                            oppLinesToInsertByRequestId.remove(ir.Id);
-                        } else {
-                            oppsToInsertByRequestId.put(ir.Id, IncomingRequestHelper.GetNewOpp(oldOpp, ir, this.recordTypeId));
-                            // And because we have a new opp, we'll need to deactivate the old
-                            oppsToUpdate.add(new Opportunity(Id = oldOpp.Id, Is_Active__c = false));
-                        }
+                    }
+                    // If we're not creating a new opp it's because all SKUs match the lines of the existing opp. Remove the provisional opp lines we created
+                    if (!createNewOpp && oppLinesToInsertByRequestId.get(ir.Id) != null) {
+                        oppLinesToInsertByRequestId.remove(ir.Id);
+                    } else {
+                        oppsToInsertByRequestId.put(ir.Id, IncomingRequestHelper.GetNewOpp(oldOpp, ir, this.recordTypeId));
+                        // And because we have a new opp, we'll need to deactivate the old
+                        oppsToUpdate.add(new Opportunity(Id = oldOpp.Id, Is_Active__c = false));
                     }
                 } catch (Exception ex) {
                     String errorMsg = 'Error processing Account, Opportunity or incoming SKU: ' + ex.getMessage() + ', Line #: ' + ex.getLineNumber();

@@ -35,8 +35,10 @@ public with sharing class AccountTriggerHandler
         Set<Id> accountIds = new Set<Id>();
         for (Account a : newMap.values())
         {
-            if (a.Is_Northpass_Qualified__c && a.Is_Northpass_Qualified__c != oldMap.get(a.Id).Is_Northpass_Qualified__c)
+            if (a.Is_Northpass_Qualified__c && (a.Is_Northpass_Qualified__c != oldMap.get(a.Id).Is_Northpass_Qualified__c))
             {
+                System.debug('account tenant id: ' + a.DEAR_Tenant_Id__c);
+                System.debug('is account Northpass qualified: ' + a.Is_Northpass_Qualified__c + '. was account not qualified before? :' + oldMap.get(a.Id).Is_Northpass_Qualified__c);
                 accountIds.add(a.Id);
             }
         }
@@ -100,4 +102,7 @@ public with sharing class AccountTriggerHandler
         // Insert error logs
         if (errorLogs.size() > 0) insert errorLogs;        
     }
+
+
+    
 }

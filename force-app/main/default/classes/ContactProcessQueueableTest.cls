@@ -118,7 +118,7 @@ public with sharing class ContactProcessQueueableTest {
         MockHttpResponseHandler.SimpleMockResponse getResp = new MockHttpResponseHandler.SimpleMockResponse('GET', getResponse);
         MockHttpResponseHandler mock = new MockHttpResponseHandler();
         mock.addResponse('callout:Customer_Details', getResp);
-
+        JSON.serializePretty('oldopp: ' + JSON.serializePretty(IncomingRequestHelper.GetOldOppByTenantId(req.Tenant_Id__c)));
         // Pre-assert 
         Assert.areEqual(1, [SELECT COUNT() FROM Contact]);
         Assert.areEqual('John D', [SELECT Name FROM Contact].Name);
