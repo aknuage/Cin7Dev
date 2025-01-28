@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : AKelly | NuAge Experts
+ * @group             : 
+ * @last modified on  : December 2024
+ * @last modified by  : AKelly | NuAge Experts
+**/
 global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObject > , Database.AllowsCallouts {
 
     private Id recordTypeId;
@@ -22,7 +29,7 @@ global class IncomingReqDiscountChangeBatch implements Database.Batchable < sObj
         Map < Id, List < OpportunityLineItem >> oppLinesToInsertByRequestId = new Map < Id, List < OpportunityLineItem >> ();
 
         for (Incoming_Request__c ir: requests) {
-            String tenantId = ir.Tenant_ID__c;
+            String tenantId = ir.Tenant_ID__c.toUpperCase();
             HttpResponse response = IncomingRequestHelper.GetCoreCustomerDetails(tenantId);
 
             if (response == null) break; // If null, error already recorded to API error log

@@ -22,7 +22,7 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
         Map < Id, List < OpportunityLineItem >> oppLinesToInsertByRequestId = new Map < Id, List < OpportunityLineItem >> ();
 
         for (Incoming_Request__c ir: requests) {
-            String tenantId = ir.Tenant_ID__c;
+            String tenantId = ir.Tenant_ID__c.toUpperCase();
             HttpResponse response = IncomingRequestHelper.GetCoreCustomerDetails(tenantId);
             if (response == null) break; // If null, error already recorded to API error log
 
@@ -85,11 +85,6 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
             else {
                 apiErrorLogsToInsert.add(IncomingRequestHelper.LogResponseError(jsonResp, response));
             }
-        }
-
-        for (OpportunityLineItem oli : oppLinesToInsertByRequestId.values())
-        {
-            System.debug('Opp Line Item: ' + JSON.serializePretty(oli));
         }
 
         // DML

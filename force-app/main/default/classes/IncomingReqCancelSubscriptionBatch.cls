@@ -19,7 +19,6 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
     }
 
     public void execute(Database.BatchableContext bc, List<Incoming_Request__c> incomingRequests) {
-        Set<String> tenantIds = new Set<String>();
         List<Account> accountsToUpdate = new List<Account>();
         List<Opportunity> clonedOpportunities = new List<Opportunity>();
         Map<Id, Opportunity> originalToClonedOppMap = new Map<Id, Opportunity>();
@@ -36,21 +35,22 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
             IncomingRequestJSONParse jsonResp = IncomingRequestJSONParse.parse(response.getBody());
 
             if (jsonResp.Data != null && !String.isBlank(jsonResp.Data.TenantID)) {
-                tenantIds.add(jsonResp.Data.TenantID);
-                tenantIdToResp.put(jsonResp.Data.TenantID, jsonResp);
+                String tenantId = jsonResp.Data.TenantID.toUpperCase();
+                tenantIdToResp.put(tenantId, jsonResp);
             }
         }
     
         // Query related Accounts by incoming Tenant IDs
         Map<Id, Account> accountsToCancel = new Map<Id, Account>([
-            SELECT Id, DEAR_Tenant_ID__c FROM Account WHERE DEAR_Tenant_ID__c IN :tenantIds
+            SELECT Id, DEAR_Tenant_ID__c FROM Account WHERE DEAR_Tenant_ID__c IN :tenantIdToResp.keySet()
         ]);
         
         // Set Cancellation Date, Dear CRM Status, etc for each account
         for (Account a : accountsToCancel.values())
         {
-            IncomingRequestJSONParse jsonResp = tenantIdToResp.get(a.DEAR_Tenant_Id__c);
-            a = IncomingRequestHelper.ProcessAccountUpdates(a, jsonResp);
+            String tenantId = a.DEAR_Tenant_Id__c.toUpperCase();
+            IncomingRequestJSONParse jsonResp = tenantIdToResp.get(tenantId);
+            a = IncomingRequestHelper.ProcessCancelAccountUpdates(a, jsonResp);
             if (a.Core_Last_Updated_Date__c == null) a.Core_Last_Updated_Date__c = Datetime.now();
             accountsToUpdate.add(a);
         }

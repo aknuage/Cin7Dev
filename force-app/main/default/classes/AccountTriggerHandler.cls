@@ -18,6 +18,47 @@ public with sharing class AccountTriggerHandler
     }
 
     /**
+     * If a Trial Account's Partner Account was initially null and then is populated, OR
+     * if a Trial Account has a tenant ID and a Related Partner Account, but Is Partner Onboarding
+     * updates from null to non-null, then make a callout to the Partner Client Account Relationship
+     * endpoint.
+     * 
+     * Called by AccountTrigger after update      
+     *    
+     * @param newList - List of accounts being updated
+     * @param oldMap - Map of Accounts prior to update
+     * @author nkoonce @ NuAge : CIN7-120 : Jan 2025
+     */ 
+    public static void UpdatePartnerClientRelationship(List<Account> newList, Map<Id, Account> oldMap)
+    {
+        Set <Account> accountsToQueue = new Set<Account>();
+        for (Account a : newList) {
+            // SCENARIO 1: If Client Dear Tenant ID is not Null and Related Partner Account is filled in, queue job
+            if (a.Dear_tenant_Id__c != null) {
+                if (oldMap.get(a.Id).Related_Partner_Account__c == null && a.Related_Partner_Account__c != null)
+                {
+                    System.debug('client partner account was populated. making callout');
+                    accountsToQueue.add(a);
+                }
+                // SCENARIO 2: If Client has Tenant ID and Related Partner Account but Partner Onboarding updates to not null, queue job
+                else if (a.Related_Partner_Account__c != null && (a.Partner_Onboarding__c == true && oldMap.get(a.Id).Partner_Onboarding__c == false))
+                {
+                    System.debug('partner onboarding is now true. making callout');
+                    accountsToQueue.add(a);
+                }
+            }
+        }
+        // For Accounts meeting SCENARIO 1 or SCENARIO 2 criteria, make callout to Account Partner endpoint
+        if (!accountsToQueue.isEmpty()) {
+            for (Account a : accountsToQueue) {
+                String clientId = a.DEAR_Tenant_Id__c;
+                Boolean isOnboarding = a.Partner_Onboarding__c;
+                System.enqueueJob(new AccountPartnerClientQueueable(a.Related_Partner_Account__c, clientId, isOnboarding));
+            }
+        }
+    }
+
+    /**
      * If an Account becomes a paid customer (their Platform Account Status = Onboarding, Live or Client), and they have a Dear Tenant Id
      * or a Cin7 User Name, the active contacts are subscribed to the Northpass LMS
      * 
@@ -65,7 +106,7 @@ public with sharing class AccountTriggerHandler
 
                 wrap.data.attributes.type = 'people';
                 wrap.data.attributes.first_name = acr.Contact.FirstName;
-                wrap.data.attributes.last_name = acr.Contact.LastName;
+            wrap.data.attributes.last_name = acr.Contact.LastName;
                 wrap.data.attributes.email = acr.Contact.Email;
                 wrap.data.attributes.dear_tenant_id = acr.Account.Dear_Tenant_Id__c;
 

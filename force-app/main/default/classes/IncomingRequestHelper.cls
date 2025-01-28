@@ -184,7 +184,14 @@ public with sharing class IncomingRequestHelper
     //     return userSku;
     // }
 
-    public static String normalizeTenantId(String tenantId)
+    /**
+     * Tenant IDs are case sensitive, so the query might not locate the Account/Opp
+     * correctly unless it is normalized to uppercase.
+     * @param tenantId - Tenant ID from the incoming request.
+     * @return Uppercased string.
+     * @author - akelly @ NuAge : CIN7-112 : December 2024
+    */
+    public static String NormalizeTenantId(String tenantId)
     {
         return tenantId.toUpperCase();
     }
@@ -219,15 +226,36 @@ public with sharing class IncomingRequestHelper
     */
     public static Account ProcessAccountUpdates(Account acc, IncomingRequestJSONParse jsonResp)
     {
-        acc.Core_Account_Create_Date__c = jsonResp.Data.CreateDate;
-        acc.Core_Last_Updated_Date__c = jsonResp.Data.LastUpdatedDate;
-        acc.BillingCountry = jsonResp.Data.Country;
-        acc.Core_Subscribed_Date__c = jsonResp.Data.Subscribed;
-        acc.Core_Cancelled_Date__c = jsonResp.Data.Cancelled;
-        acc.Subscription_Expiration_Date__c = Date.valueOf(jsonResp.Data.SubscriptionExpirationDate);
-        acc.Website = jsonResp.Data.WebsiteURL;
-        acc.Partner_Type__c = jsonResp.Data.PartnerType;
-        acc.DEAR_CRM_Status__c = jsonResp.Data.Status;
+        acc.Core_Account_Create_Date__c = jsonResp.Data?.CreateDate;
+        acc.Core_Last_Updated_Date__c = jsonResp.Data?.LastUpdatedDate;
+        acc.BillingCountry = jsonResp.Data?.Country;
+        acc.Core_Subscribed_Date__c = jsonResp.Data?.Subscribed;
+        acc.Core_Cancelled_Date__c = jsonResp.Data?.Cancelled;
+        acc.Subscription_Expiration_Date__c = Date.valueOf(jsonResp.Data?.SubscriptionExpirationDate);
+        acc.Website = jsonResp.Data?.WebsiteURL;
+        acc.Partner_Type__c = jsonResp.Data?.PartnerType;
+        acc.DEAR_CRM_Status__c = jsonResp.Data?.Status;
+        return acc;
+    }
+    /**
+     * Updates account fields based on data parsed from the incoming request's response JSON.
+     * This method ensures the account record is in sync with the most recent data received.
+     * It is almost the same as the above, but Cancellation message does not need to update CreateDate.
+     * @param acc - The Account to update.
+     * @param jsonResp - The JSON response parsed from the incoming request containing account update data.
+     * @return - The updated Account object.
+     * @author - akelly @ NuAge : CIN7-112 : Jan 2025
+    */
+    public static Account ProcessCancelAccountUpdates(Account acc, IncomingRequestJSONParse jsonResp)
+    {
+        acc.Core_Last_Updated_Date__c = jsonResp.Data?.LastUpdatedDate;
+        acc.BillingCountry = jsonResp.Data?.Country;
+        acc.Core_Subscribed_Date__c = jsonResp.Data?.Subscribed;
+        acc.Core_Cancelled_Date__c = jsonResp.Data?.Cancelled;
+        acc.Subscription_Expiration_Date__c = Date.valueOf(jsonResp.Data?.SubscriptionExpirationDate);
+        acc.Website = jsonResp.Data?.WebsiteURL;
+        acc.Partner_Type__c = jsonResp.Data?.PartnerType;
+        acc.DEAR_CRM_Status__c = jsonResp.Data?.Status;
         return acc;
     }
 

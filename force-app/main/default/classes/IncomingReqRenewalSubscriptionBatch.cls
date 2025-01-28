@@ -24,21 +24,20 @@ public with sharing class IncomingReqRenewalSubscriptionBatch implements Databas
         Set<String> tenantIds = new Set<String>();
 
         for (Incoming_Request__c request : incomingRequests) {
-            System.debug('request? ' + JSON.serialize(request));
-            tenantIds.add(request.Tenant_Id__c);
+            tenantIds.add( request.Tenant_Id__c.toUpperCase() );
         }
 
         // Retrieve Accounts in bulk based on tenant IDs
         Map<String, Account> accountMap = new Map<String, Account>();
         for (Account acc : [SELECT Id, Name, DEAR_Tenant_ID__c FROM Account WHERE DEAR_Tenant_ID__c IN :tenantIds]) {
-            System.debug('account name: ' + acc.Name);
-            accountMap.put(acc.DEAR_Tenant_ID__c, acc);
+            String accTenantId = acc.DEAR_Tenant_ID__c.toUpperCase();
+            accountMap.put(accTenantId, acc);
         }
 
         List<Account> accountsToUpdate = new List<Account>();
 
         for (Incoming_Request__c ir : incomingRequests) {
-            String tenantId = ir.Tenant_Id__c;
+            String tenantId = ir.Tenant_Id__c.toUpperCase();
             
             // Match Account to corresponding Incoming Request based on shared Tenant ID
             if (accountMap.containsKey(tenantId)) {
@@ -67,8 +66,14 @@ public with sharing class IncomingReqRenewalSubscriptionBatch implements Databas
     
                     }
                 } else {
-                    System.debug('error in account renewal');
-                    apiErrorLogsToInsert.add(IncomingRequestHelper.LogResponseError(null, response));
+                    String err = 'Error in account renewal HTTP Response: ' + tenantId;
+                    apiErrorLogsToInsert.add(
+                        new API_Error_Log__c(
+                            Error_Message__c = err,
+                            HTTP_Status_Code__c = response?.getStatusCode(),
+                            Status__c = response?.getStatus()
+                        )
+                    );
                 }
             }
         }

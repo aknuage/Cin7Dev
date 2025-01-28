@@ -10,11 +10,15 @@ trigger AccountTrigger on Account (before insert, before update, before delete, 
 
         when BEFORE_UPDATE {
             AccountTriggerHandler.checkAccountPartnerStatus(Trigger.newMap,Trigger.oldMap);
-            AccountTriggerHandler.updatePartnerAccountProvisioning();
+            // AccountTriggerHandler.updatePartnerAccountProvisioning();
         } 
         when AFTER_UPDATE {
             AccountTriggerHandler.ProcessAccountForNorthpass(Trigger.newMap, Trigger.oldMap);
-        }         
+            List<Account> triggerNew = (List<Account>)Trigger.new;
+            Map<Id, Account> triggerOldMap = (Map<Id, Account>)Trigger.oldMap;
+            // Cin7-120 - Make Callout to Account Partner Client endpoint if conditions met
+            AccountTriggerHandler.UpdatePartnerClientRelationship(triggerNew, triggerOldMap);
+        }
 
     } 
 
