@@ -21,11 +21,11 @@ public with sharing class IncomingRequestBatchableNewOpp implements Database.Bat
          // Get all pricebook entries related to standard pricebook and load into a map keyed by product code
          List<PriceBookEntry> pbeList = [SELECT Product2.Id, Product2.Name, Product2.ProductCode, Id FROM PriceBookEntry WHERE Pricebook2Id IN (SELECT Id FROM PriceBook2 WHERE isStandard = true)];
 
-        Map<String,Id> pricebookEntryMap = new Map<String,Id>();
-        for(PriceBookEntry pbe : pbeList)
+    Map<String,Id> pricebookEntryMap = new Map<String,Id>();
+    for(PriceBookEntry pbe : pbeList)
         {
-            pricebookEntryMap.put(pbe.Product2.ProductCode, pbe.Id);
-        }
+             pricebookEntryMap.put(pbe.Product2.ProductCode, pbe.Id);
+         }
 
         // Callout to Core for customer details and process the response 
         Map<Id,Opportunity> oppsToInsertByRequestId = new Map<Id,Opportunity>();
@@ -40,7 +40,7 @@ public with sharing class IncomingRequestBatchableNewOpp implements Database.Bat
 
             // Parse into wrapper
             IncomingRequestJSONParse jsonResp = IncomingRequestJSONParse.parse(response.getBody());
-            System.debug('jsonResp: ' + JSON.serializePretty(jsonResp));
+            System.debug(jsonResp);
 
             // Iterate response wrapper
             if (jsonResp.Errors == null)
@@ -69,6 +69,7 @@ public with sharing class IncomingRequestBatchableNewOpp implements Database.Bat
                     // Update Account fields from CORE API callout // TODO: this and Account query above will ultimately be folded into the UpdateAccount pathway per CIN7-112
                     if(acc != null)
                     {
+                        acc.Name = jsonResp.Data.Organisation;
                         acc.Core_Account_Create_Date__c = jsonResp.Data.CreateDate;
                         acc.Core_Last_Updated_Date__c = jsonResp.Data.LastUpdatedDate;
                         acc.BillingCountry = jsonResp.Data.Country;

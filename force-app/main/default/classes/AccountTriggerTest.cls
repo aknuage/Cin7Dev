@@ -24,7 +24,7 @@ public with sharing class AccountTriggerTest {
 
         Test.startTest();
             Test.setMock(HttpCalloutMock.class, mock);
-            acc.Partner_Type__c = 'Development Partner';
+            acc.Partner_Type__c = 'Referral Partner';
             acc.Partner_Status__c = 'Active';
             update acc; 
         Test.stopTest();

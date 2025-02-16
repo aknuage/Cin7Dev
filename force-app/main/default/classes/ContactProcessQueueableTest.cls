@@ -123,12 +123,13 @@ public with sharing class ContactProcessQueueableTest {
         Assert.areEqual(1, [SELECT COUNT() FROM Contact]);
         Assert.areEqual('John D', [SELECT Name FROM Contact].Name);
         Assert.areEqual(1, [SELECT COUNT() FROM Opportunity]);
-        
+
         // Act
         Test.startTest();
             Test.setMock(HttpCalloutMock.class, mock);
             insert req;
         Test.stopTest();
+
         // Post-assert
         Assert.areEqual(2,[SELECT COUNT() FROM Contact]);
         Assert.areEqual(1, [SELECT COUNT() FROM Contact WHERE Name = 'John Doe']);

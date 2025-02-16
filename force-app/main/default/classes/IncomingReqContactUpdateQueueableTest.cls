@@ -63,8 +63,6 @@ public with sharing class IncomingReqContactUpdateQueueableTest {
         Test.stopTest();
 
         // Post-assert
-        System.debug('account name? : ' + [SELECT Name FROM Account WHERE Id = :con.AccountId].Name);
-
         Assert.areEqual(2,[SELECT COUNT() FROM Contact]);
         Assert.areEqual(1, [SELECT COUNT() FROM Contact WHERE Name = 'John Doe']);
         Assert.areEqual(1, [SELECT COUNT() FROM Contact WHERE Name = 'Jane Doe']);

@@ -95,7 +95,7 @@ public with sharing class LeadTriggerQueueable implements Queueable,Database.All
             System.debug(resp);
 
             LeadTriggerJSONParse jsonResp = LeadTriggerJSONParse.parse(resp.getBody());
-            System.debug('jsonResp: ' + JSON.serializePretty(jsonResp));
+            System.debug(jsonResp);
 
             if(jsonResp.Errors == null){
                 this.nLead.DEAR_Tenant_ID__c = jsonResp.Data.TenantID;

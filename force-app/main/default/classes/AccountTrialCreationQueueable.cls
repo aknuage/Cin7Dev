@@ -2,28 +2,13 @@
  * Queueable job to process account trial creation and partner-client relationship updates.
  * This job handles POST and PUT requests to create accounts and manage partner relationships.
  *
- * @author         : Anthony Kelly
+ * @author         : Anthony Kelly - AKelly @ Nuage - Cin7-120
  * @date           : January 2025
  */
 public class AccountTrialCreationQueueable implements Queueable, Database.AllowsCallouts {
-    private static final String ENDPOINT;
     private static String clientTenantId;
-
-    // Instance variable to hold the AccountWrapper data
     private AccountTrialWrapper wrapper;
-
-    // Static block to initialize endpoints based on the environment (Sandbox or Production)
-    static {
-        Boolean isSandbox = [SELECT IsSandbox FROM Organization LIMIT 1].IsSandbox;
-
-        // Assign POST and PUT endpoints based on whether it's a sandbox or not
-        if (isSandbox) {
-            ENDPOINT = 'https://qa.dearsystems.com/salesforce/api/v1/createaccount';
-        } else {
-            ENDPOINT = 'https://dearsystems.com/salesforce/api/v1/createaccount';
-        }
-    }
-
+    
     /**
      * Constructor to accept the AccountWrapper from Invocable Method.
      * Initializes timezoneMap with Olson timezone formats.
@@ -53,7 +38,7 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
      * @date January 2025
      */
     public void execute(QueueableContext context) {
-        System.debug('ctx wrapper: ' + JSON.serializePretty(this.wrapper));
+        // System.debug('ctx wrapper: ' + JSON.serializePretty(this.wrapper));
         doTrialAccountCallout(this.wrapper);
     }
 
@@ -81,14 +66,21 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
      * @author Anthony Kelly
      * @date January 2025
      */
+    @TestVisible
     private static String buildProvisionTrialBody(AccountTrialWrapper wrapper) {
         Map < String, String > countryCodeMap = getCountryCodeMap();
         String country = wrapper.BillingCountry ?.toLowerCase();
         String countryCode = countryCodeMap.get(country);
 
-        String demoDataStr = wrapper.demoData ? 'yes' : 'no';
+        String demoDataStr;
+        // Handle null demo data
+        if (wrapper.demoData != null) {
+            demoDataStr = wrapper.demoData ? 'yes' : 'no';
+        } else {
+            demoDataStr = 'no';
+        }
+
         String timezone = GetTimeZone(wrapper.timeZone);
-        System.debug('timezone: ' + timezone);
 
         // Construct the payload as per the API specifications
         Map < String, Object > payload = new Map < String, Object > {
@@ -125,12 +117,13 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
         if (isValidAccount(wrapper.platformAccountStatus)) {
             String requestBody = buildProvisionTrialBody(wrapper);
 
+            publishTrialCreationEvent(false, wrapper.accountId, 'Queued');
+
             // Set up the HTTP request to the POST endpoint
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(ENDPOINT);
+            req.setEndpoint('callout:Account_Provisions');
             req.setMethod('POST');
             req.setHeader('Content-Type', 'application/json');
-            req.setHeader('api-auth-applicationkey', 'D88110D6-7F86-4016-95E7-40AAC906AAC6');
             req.setBody(requestBody);
             req.setTimeout(120000);
 
@@ -140,7 +133,9 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
             // Handle the response from the API
             handleNewTrialResponse(res, wrapper);
         } else {
+            String errorMsg = 'Exception: Account status does not meet criteria for trial creation: ' + wrapper.platformAccountStatus;
             System.debug('Account does not meet criteria for trial creation');
+            publishTrialCreationEvent(false, wrapper.accountId, errorMsg);
         }
     }
 
@@ -157,7 +152,7 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
             if (res.getStatusCode() == 200) {
                 // Parsing the JSON response
                 TrialAcctJSONParse jsonResp = TrialAcctJSONParse.parse(res.getBody());
-    
+                System.debug('res body: ' + res.getBody());
                 // Checking if there are errors in the response
                 if (jsonResp.Errors != null) {
                     // Insert API error log
@@ -177,7 +172,11 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
                             Core_Last_Updated_Date__c = System.now()
                         );
                         update trialAccount;
-    
+
+                        // Publish Platform Event
+                        publishTrialCreationEvent(true, wrapper.accountId, 'Reload');
+
+                        System.debug('Account Trial Creation Queueable Depth ==> ' + AsyncInfo.getCurrentQueueableStackDepth());
                         // Enqueue the AccountPartnerClientQueueable job if partnerAccount is non-null
                         if (wrapper.partnerAccount != null && String.isNotBlank(wrapper.partnerAccount)) {
                             System.enqueueJob(
@@ -189,6 +188,8 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
                     } catch (Exception ex) {
                         // Catch any exception while updating the trial account and log the error
                         System.debug('Exception during account update: ' + ex.getMessage());
+                        String errorMsg = 'Exception updating Trial Account: ' + ex.getMessage();
+                        publishTrialCreationEvent(false, wrapper.accountId, errorMsg);
                     }
                 }
             }
@@ -197,7 +198,6 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
             System.debug('Exception in handleNewTrialResponse: ' + ex.getMessage());
         }
     }
-    
 
     /**
      * Retrieves the country code map from custom metadata.
@@ -214,4 +214,43 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
         }
         return result;
     }
+
+    private static void publishTrialCreationEvent(Boolean isTrialCreated, String accountId, String message)
+    {
+        Trial_Account_Created__e tacEvent = new Trial_Account_Created__e(
+            Trial_Created__c = isTrialCreated, 
+            AccountId__c = accountId,
+            Message__c = message
+        );
+
+        EventBus.publish(new List<Trial_Account_Created__e>{ tacEvent });
+    }
+
+    // CIN7-120: May need to implement if Queueable job limits keep ballooning
+    // private static void chainPartnerJob(AccountTrialWrapper wrapper, TrialAcctJSONParse jsonResp) {
+    //     Boolean isSandbox = [SELECT IsSandbox FROM Organization LIMIT 1].IsSandbox;
+    //     integer depth = AsyncInfo.getCurrentQueueableStackDepth();
+
+    //     if (!isSandbox) {
+    //         System.enqueueJob(
+    //             new AccountPartnerClientQueueable(
+    //                 wrapper.partnerAccount, jsonResp.Data.TenantID, wrapper.partnerOnboarding
+    //             )
+    //         );
+    //         // return String.valueOf(jobId);
+    //     }
+
+    //     // Allow up to 10 stacked jobs in Sandboxes, overriding Gov Limits
+    //     if (isSandbox && depth >= 5) {
+    //         System.enqueueJob(
+    //             new AccountPartnerClientQueueable(
+    //                 wrapper.partnerAccount, jsonResp.Data.TenantID, wrapper.partnerOnboarding
+    //             ), 10
+    //         );
+    //         // return String.valueOf(jobId);
+    //     }
+
+    //     // return null;
+    // }
+    
 }

@@ -18,7 +18,7 @@ trigger AccountTrigger on Account (before insert, before update, before delete, 
             Map<Id, Account> triggerOldMap = (Map<Id, Account>)Trigger.oldMap;
             // Cin7-120 - Make Callout to Account Partner Client endpoint if conditions met
             AccountTriggerHandler.UpdatePartnerClientRelationship(triggerNew, triggerOldMap);
-        }
+        }         
 
     } 
 

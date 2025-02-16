@@ -66,7 +66,6 @@ public with sharing class ContactTriggerHandler
     public static void SubscribeToNorthpass(List<Contact> newList, Map<Id,Contact> oldMap)
     {
         system.debug('Is Insert? ' + Trigger.isInsert);
-        system.debug('Is Update? ' + Trigger.isUpdate);
 
         List<API_Error_Log__c> errorLogs = new List<API_Error_Log__c>();
 

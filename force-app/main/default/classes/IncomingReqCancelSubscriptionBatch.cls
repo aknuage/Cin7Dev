@@ -8,8 +8,7 @@
 public with sharing class IncomingReqCancelSubscriptionBatch implements Database.Batchable<sObject>, Database.Stateful, Database.AllowsCallouts {
 
     private List<Incoming_Request__c> requestsToProcess;
-    Id coreUpsellDownsellRtId = [select Id, Name from RecordType where sObjectType='Opportunity' and RecordType.Name = 'Core Upgrade/Downgrade' LIMIT 1].Id;
-
+    
     public IncomingReqCancelSubscriptionBatch(List<Incoming_Request__c> newRequests) {
         this.requestsToProcess = newRequests;
     }
@@ -19,12 +18,11 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
     }
 
     public void execute(Database.BatchableContext bc, List<Incoming_Request__c> incomingRequests) {
-        List<Account> accountsToUpdate = new List<Account>();
+        Set<String> tenantIds = new Set<String>();
         List<Opportunity> clonedOpportunities = new List<Opportunity>();
         Map<Id, Opportunity> originalToClonedOppMap = new Map<Id, Opportunity>();
         List<API_Error_Log__c> apiErrorLogsToInsert = new List<API_Error_Log__c>();
         List<OpportunityLineItem> clonedLineItems = new List<OpportunityLineItem>();
-        Map<String, IncomingRequestJSONParse> tenantIdToResp = new Map<String, IncomingRequestJSONParse>();
     
         // Collect tenant IDs from incoming requests
         for (Incoming_Request__c ir : incomingRequests) {
@@ -35,33 +33,22 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
             IncomingRequestJSONParse jsonResp = IncomingRequestJSONParse.parse(response.getBody());
 
             if (jsonResp.Data != null && !String.isBlank(jsonResp.Data.TenantID)) {
-                String tenantId = jsonResp.Data.TenantID.toUpperCase();
-                tenantIdToResp.put(tenantId, jsonResp);
+                tenantIds.add(jsonResp.Data.TenantID);
             }
         }
     
         // Query related Accounts by incoming Tenant IDs
         Map<Id, Account> accountsToCancel = new Map<Id, Account>([
-            SELECT Id, DEAR_Tenant_ID__c FROM Account WHERE DEAR_Tenant_ID__c IN :tenantIdToResp.keySet()
+            SELECT Id FROM Account WHERE DEAR_Tenant_ID__c IN :tenantIds
         ]);
-        
-        // Set Cancellation Date, Dear CRM Status, etc for each account
-        for (Account a : accountsToCancel.values())
-        {
-            String tenantId = a.DEAR_Tenant_Id__c.toUpperCase();
-            IncomingRequestJSONParse jsonResp = tenantIdToResp.get(tenantId);
-            a = IncomingRequestHelper.ProcessCancelAccountUpdates(a, jsonResp);
-            if (a.Core_Last_Updated_Date__c == null) a.Core_Last_Updated_Date__c = Datetime.now();
-            accountsToUpdate.add(a);
-        }
-
+    
         Map<Id, Opportunity> mostRecentOpps = new Map<Id, Opportunity>();
         Map<Id, List<OpportunityLineItem>> oppLineItemsMap = new Map<Id, List<OpportunityLineItem>>();
         
         // Get the most recent Opportunities related to the Account being canceled
         for (Opportunity opp : [
             SELECT Id, Name, AccountId, CloseDate, Dear_Tenant_Id__c, Amount, Is_Active__c, RecordTypeId, StageName, Pricebook2Id,
-            CurrencyIsoCode, OwnerId,
+            CurrencyIsoCode, 
             (SELECT Quantity, UnitPrice, Product2Id FROM OpportunityLineItems)
             FROM Opportunity
             WHERE AccountId IN :accountsToCancel.keySet()
@@ -80,14 +67,11 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
             Opportunity clonedOpp = originalOpp.clone(false, true); // Deep clone without carrying IDs
             clonedOpp.StageName = 'Closed Won';
             clonedOpp.Is_Active__c = true;
-            clonedOpp.CloseDate = System.today();
-            clonedOpp.OwnerId = originalOpp.OwnerId;
-            clonedOpp.RecordTypeId = coreUpsellDownsellRtId;
-            clonedOpp.Parent_Opportunity__c = originalOpp.Id;
-            clonedOpp.CurrencyIsoCode = originalOpp.CurrencyIsoCode;
             clonedOpp.Amount = 0;  // Set amount to zero for the cancellation opportunity
             clonedOpp.Pricebook2Id = originalOpp.Pricebook2Id;  // Ensuring the price book is set
             clonedOpp.Name = originalOpp.Name + ' - Cancellation';
+            clonedOpp.Parent_Opportunity__c = originalOpp.Id;
+            clonedOpp.CurrencyIsoCode = originalOpp.CurrencyIsoCode;
             clonedOpp.Pricebook2Id = originalOpp.Pricebook2Id;  // Ensuring the price book is set correctly
             clonedOpportunities.add(clonedOpp);
             originalToClonedOppMap.put(originalOpp.Id, clonedOpp);
@@ -98,7 +82,10 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
             insert clonedOpportunities;
         } catch (DmlException ex) {
             System.debug('issue inserting cloned opps: ' + ex.getMessage());
-            apiErrorLogsToInsert.add(new API_Error_Log__c(Error_Message__c = ex.getMessage(), Status__c = 'Failed to insert cloned opportunities'));
+            apiErrorLogsToInsert.add(new API_Error_Log__c(
+                Error_Message__c = ex.getMessage(),
+                Status__c = 'Failed to insert cloned opportunities'
+            ));
         }
     
         // Prepare and clone Opportunity Line Items
@@ -124,15 +111,18 @@ public with sharing class IncomingReqCancelSubscriptionBatch implements Database
                 insert clonedLineItems;
             } catch (DmlException ex) {
                 System.debug('issue inserting olis: ' + ex.getMessage());
-                apiErrorLogsToInsert.add(new API_Error_Log__c(Error_Message__c = ex.getMessage(), Status__c = 'Failed to insert cloned line items'));
+                apiErrorLogsToInsert.add(new API_Error_Log__c(
+                    Error_Message__c = ex.getMessage(),
+                    Status__c = 'Failed to insert cloned line items'
+                ));
             }
         }
 
-        if (!accountsToUpdate.isEmpty()) update accountsToUpdate;
         if (!mostRecentOpps.isEmpty()) update mostRecentOpps.values();
         if (!apiErrorLogsToInsert.isEmpty()) insert apiErrorLogsToInsert;
         
-    }    
+    }
+    
 
     public void finish(Database.BatchableContext bc) {}
 }

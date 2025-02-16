@@ -69,7 +69,7 @@ public with sharing class IncomingRequestBatchable implements Database.Batchable
         List<IncomingRequestJSONParse.SKUs> newSkuList = new List<IncomingRequestJSONParse.SKUs>();
         List<IncomingRequestJSONParse.SKUs> updateSkuList = new List<IncomingRequestJSONParse.SKUs>();
         
-        // invoke web service callout to get 'customer details' endpoint
+        // invoke web service callout to get 'customer detials' endpoint
         HttpRequest req = new HttpRequest();
         for(Incoming_Request__c newReq : incomingRequests){
             req.setEndpoint('callout:Customer_Details' + '?tenantID=' + newReq.Tenant_ID__c);
@@ -87,7 +87,7 @@ public with sharing class IncomingRequestBatchable implements Database.Batchable
                 resp = http.send(req);
                 System.debug(resp.getBody());
                 jsonResp = IncomingRequestJSONParse.parse(resp.getBody());
-                System.debug(jsonResp);
+                System.debug(jsonResp);                    
             } 
             catch (Exception e) 
             {
@@ -98,10 +98,10 @@ public with sharing class IncomingRequestBatchable implements Database.Batchable
                 if (resp != null)
                 {
                     err.HTTP_Status_Code__c = resp.getStatusCode();
-                    err.Error_Message__c += '\r\n' + resp.getBody();
+                    err.Error_Message__c += '\r\n' + resp.getBody();                    
                 }
-                insertAPIErrorLogs.add(err);
-                continue;
+                insertAPIErrorLogs.add(err);  
+                continue;              
             }
 
             if(jsonResp.Errors == null){

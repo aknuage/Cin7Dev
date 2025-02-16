@@ -201,7 +201,6 @@ public with sharing class IncomingReqNewSubscriptionBatchTest {
         
     }
 
-    // "Prod2" SKU + opportunity line item should be deleted because it does not exist in Pricebook
     @isTest
     public static void deleteUnknownSKUsTest()
     {
@@ -249,6 +248,34 @@ public with sharing class IncomingReqNewSubscriptionBatchTest {
             Test.setMock(HttpCalloutMock.class, mock);
             Database.executeBatch(new IncomingReqNewSubscriptionBatch(new List<Incoming_Request__c>{req}));
         Test.stopTest();
+
+        // Post-assert
+        // List<Contact> assertContacts = [SELECT Name, Email, Cin7_Core_User_Id__c FROM Contact];
+        // Assert.areEqual(2, assertContacts.size());
+        // Boolean foundJohn = false;
+        // Boolean foundJane = false;
+        // for (Contact c : assertContacts)
+        // {
+        //     if (c.Name == 'John Doe')
+        //     {
+        //         Assert.areEqual('cbecdcde-d39c-4620-9d84-1e57afe87e15', c.Cin7_Core_User_Id__c);
+        //         Assert.areEqual('john@doe.com', c.Email);
+        //         foundJohn = true;
+        //     } 
+        //     if (c.Name == 'Jane Doe') 
+        //     {
+        //         Assert.areEqual('b587c24d-b53b-4f95-b837-48580a1a39c4', c.Cin7_Core_User_Id__c);
+        //         Assert.areEqual('jane@doe.com', c.Email);
+        //         foundJane = true;
+        //     }
+        // }
+        // Assert.isTrue(foundJohn);
+        // Assert.isTrue(foundJane);
+
+        // Assert.areEqual(1, [SELECT COUNT() FROM Opportunity]);
+
+        // List<AccountContactRelation> assertAcrs = [SELECT AccountId, ContactId from AccountContactRelation];
+        // Assert.areEqual(2, assertAcrs.size());
     }
 
     // @description: Test method used to test when ALL new Contacts are found in the Get Customer details endpoint that are not already in SFDC.

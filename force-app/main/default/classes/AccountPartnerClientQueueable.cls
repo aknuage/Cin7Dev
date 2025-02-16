@@ -1,25 +1,12 @@
 public class AccountPartnerClientQueueable implements Queueable, Database.AllowsCallouts {
-    private static final String ENDPOINT;
     private String clientId;
     private String partnerAcctId;
     private Boolean isOnboarding;
-
     private AccountTrialWrapper wrapper;
-
-    static {
-        Boolean isSandbox = [SELECT IsSandbox FROM Organization LIMIT 1].IsSandbox;
-        if (isSandbox) {
-            ENDPOINT = 'https://qa.dearsystems.com/salesforce/api/v1/partnerclientrelationship';
-        } else {
-            ENDPOINT = 'https://dearsystems.com/salesforce/api/v1/partnerclientrelationship';
-        }
-    }
 
     // Constructor for use when chained POST from AccountTrialCreationQueueable
     public AccountPartnerClientQueueable(String partnerAcctId, String clientId, Boolean isOnboarding) {
-        System.debug('client ID: ' + clientId);
-        System.debug('isOnboarding: ' + isOnboarding);
-        System.debug('Partner Acct ID: ' + partnerAcctId);
+        System.debug('Partner Acct ID: ' + partnerAcctId + '. isOnboarding: ' + isOnboarding);
         this.clientId = clientId;
         this.isOnboarding = isOnboarding;
         this.partnerAcctId = partnerAcctId;
@@ -30,7 +17,7 @@ public class AccountPartnerClientQueueable implements Queueable, Database.Allows
     }
 
     /**
-     * Builds the payload for the PUT request to update the partner-client relationship.
+     * Builds the payload for the POST request to update the partner-client relationship.
      *
      * @param partnerAcctId String - The partner account ID.
      * @param clientId String - The client ID.
@@ -44,39 +31,46 @@ public class AccountPartnerClientQueueable implements Queueable, Database.Allows
             WHERE Id = :partnerAcctId
             LIMIT 1
         ];
-
+        // System.debug('isPartnerOnboarding: ' + )
         Map<String, Object> payload = new Map<String, Object>{
             'ClientID' => clientId,
             'PartnerID' => partnerAcct.DEAR_Tenant_ID__c,
             'Type' => partnerAcct.Core_Plan_Type__c == null ? '' : partnerAcct.Core_Plan_Type__c,
-            'IsPartnerOnboarding' => isOnboarding == null
+            'IsPartnerOnboarding' => isOnboarding == null ? false : isOnboarding
         };
         return JSON.serialize(payload);
     }
 
     /**
-     * Sends the PUT request to the endpoint to update the partner-client relationship.
+     * Sends the POST request to the endpoint to update the partner-client relationship.
      *
      * @param partnerAcctId String - The partner account ID.
      * @param clientId String - The client ID.
      * @param isOnboarding Boolean - Whether the partner is in onboarding or not.
      */
     private static void doPartnerClientCallout(String partnerAcctId, String clientId, Boolean isOnboarding) {
-        String requestBody = buildPayload(partnerAcctId, clientId, isOnboarding); // Fixed the method call
+        String requestBody = buildPayload(partnerAcctId, clientId, isOnboarding);
 
         HttpRequest req = new HttpRequest();
-        req.setEndpoint(ENDPOINT);
+        req.setEndpoint('callout:Partner_Client_Relationship');
         req.setMethod('POST');
         req.setHeader('Accept', '*/*');
         req.setHeader('Content-Type', 'application/json');
-        req.setHeader('api-auth-applicationkey', 'D88110D6-7F86-4016-95E7-40AAC906AAC6');
         req.setBody(requestBody);
-        req.setTimeout(120000);
+        req.setTimeout(120000); // Set at maximum timeout
 
         Http http = new Http();
         HttpResponse res = http.send(req);
+        System.debug('account client partner response code: ' + res.getStatusCode());
 
-        System.debug('resBody: ' + res.getBody());
+        // If Status Code is Okay (200), record last updated time on Partner Account
+        if (res.getStatusCode() == 200)
+        {
+            Account partnerAccount = new Account(
+                Id = partnerAcctId, Core_Last_Updated_Date__c = System.now()
+            );
+            update partnerAccount;
+        }
         if (res.getBody() != null && res.getBody().length() > 0) {
             try {
                 TrialAcctJSONParse jsonResp = TrialAcctJSONParse.parse(res.getBody());
@@ -93,9 +87,6 @@ public class AccountPartnerClientQueueable implements Queueable, Database.Allows
                 // If deserialization fails, log the error
                 System.debug('Error parsing response body: ' + e.getMessage());
            }
-        } else {
-            Account partnerAccount = new Account(Id = partnerAcctId, Core_Last_Updated_Date__c = System.now());
-            update partnerAccount;
         }
     }
 

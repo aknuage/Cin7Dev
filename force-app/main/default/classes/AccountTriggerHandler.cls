@@ -33,15 +33,22 @@ public with sharing class AccountTriggerHandler
     {
         Set <Account> accountsToQueue = new Set<Account>();
         for (Account a : newList) {
-            // SCENARIO 1: If Client Dear Tenant ID is not Null and Related Partner Account is filled in, queue job
-            if (a.Dear_tenant_Id__c != null) {
-                if (oldMap.get(a.Id).Related_Partner_Account__c == null && a.Related_Partner_Account__c != null)
+            // If Client Dear Tenant ID is not Null and Related Partner Account is filled in, check conditions
+            if (a.Dear_tenant_Id__c != null &&  a.Related_Partner_Account__c != null) {
+                // SCENARIO 1: Related Partner Account has gone from null to not null
+                if (oldMap.get(a.Id).Related_Partner_Account__c == null)
                 {
                     System.debug('client partner account was populated. making callout');
                     accountsToQueue.add(a);
                 }
                 // SCENARIO 2: If Client has Tenant ID and Related Partner Account but Partner Onboarding updates to not null, queue job
-                else if (a.Related_Partner_Account__c != null && (a.Partner_Onboarding__c == true && oldMap.get(a.Id).Partner_Onboarding__c == false))
+                else if (a.Partner_Onboarding__c != oldMap.get(a.Id).Partner_Onboarding__c)
+                {
+                    System.debug('partner onboarding is now true. making callout');
+                    accountsToQueue.add(a);
+                }
+                // SCENARIO 3: If Partner Account changes, but not to null, queue job
+                else if (a.Related_Partner_Account__c != oldMap.get(a.Id).Related_Partner_Account__c)
                 {
                     System.debug('partner onboarding is now true. making callout');
                     accountsToQueue.add(a);
@@ -50,6 +57,7 @@ public with sharing class AccountTriggerHandler
         }
         // For Accounts meeting SCENARIO 1 or SCENARIO 2 criteria, make callout to Account Partner endpoint
         if (!accountsToQueue.isEmpty()) {
+            System.debug('accountsToQueue: ' + accountsToQueue.size());
             for (Account a : accountsToQueue) {
                 String clientId = a.DEAR_Tenant_Id__c;
                 Boolean isOnboarding = a.Partner_Onboarding__c;

@@ -92,4 +92,38 @@ global with sharing class AccountTrialWrapper {
             System.enqueueJob(new AccountTrialCreationQueueable(atw));
         }
     }
+    
+    public static AccountTrialWrapper deserializeAccountToWrapper(Account acc, Contact contact) {
+        // Initialize a new AccountTrialWrapper
+        AccountTrialWrapper wrapper = new AccountTrialWrapper();
+        
+        // Map fields from Account to AccountTrialWrapper
+        wrapper.accountId = acc.Id;
+        wrapper.accountName = acc.Name;
+        wrapper.billingStreet = acc.BillingStreet;
+        wrapper.billingCity = acc.BillingCity;
+        wrapper.billingState = acc.BillingState;
+        wrapper.billingPostalCode = acc.BillingPostalCode;
+        wrapper.billingCountry = acc.BillingCountry;
+        wrapper.coreIndustry = acc.Core_Industry__c;
+        wrapper.platformAccountStatus = acc.Platform_Account_Status__c;
+        wrapper.timeZone = acc.Timezone__c;
+        wrapper.websiteURL = acc.Website;
+        wrapper.demoData = acc.Free_Trial_Demo_Data__c;
+        wrapper.couponReferralCode = acc.Core_Coupon_Referral_Code__c;
+        wrapper.partnerAccount = acc.Related_Partner_Account__c == null ? null : acc.Related_Partner_Account__c;
+        wrapper.trialDays = acc.Core_Trial_Days__c == null ? null : acc.Core_Trial_Days__c.intValue();
+        wrapper.partnerOnboarding = acc.Partner_Onboarding__c;
+
+        // Map contact information if the contact is provided
+        if (contact != null) {
+            wrapper.contactId = contact.Id;
+            wrapper.contactName = contact.FirstName + ' ' + contact.LastName;
+            wrapper.contactEmail = contact.Email;
+            wrapper.contactPhone = contact.Phone;
+        }
+
+        // Return the populated wrapper
+        return wrapper;
+    }
 }

@@ -51,7 +51,6 @@ global class MockHttpResponseHandler implements HttpCalloutMock {
             throw new MockHttpHandlerException('No response for endpoint:' + endpoint);
         }
         ResponseEndpointHolder responseHolder = responseMap.get(endpoint);
-        JSON.serializePretty('responseHolder: ' + responseHolder);
         return responseHolder.getMockResponse(req);
     }
 

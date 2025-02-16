@@ -22,8 +22,9 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
         Map < Id, List < OpportunityLineItem >> oppLinesToInsertByRequestId = new Map < Id, List < OpportunityLineItem >> ();
 
         for (Incoming_Request__c ir: requests) {
-            String tenantId = ir.Tenant_ID__c.toUpperCase();
+            String tenantId = ir.Tenant_ID__c;
             HttpResponse response = IncomingRequestHelper.GetCoreCustomerDetails(tenantId);
+
             if (response == null) break; // If null, error already recorded to API error log
 
             // Parse into wrapper
@@ -52,8 +53,7 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
                     // Add Additional Users to SKUs if present in the data
                     jsonResp.Data.SKUs = IncomingRequestHelper.ProcessAdditionalUserSkus(jsonResp);
 
-                    for (IncomingRequestJSONParse.SKUs sku: jsonResp.Data.SKUs) 
-                    {
+                    for (IncomingRequestJSONParse.SKUs sku: jsonResp.Data.SKUs) {
                         // Create the opp line in case we need it
                         if (oppLinesToInsertByRequestId.get(ir.Id) == null) {
                             oppLinesToInsertByRequestId.put(ir.Id, new List < OpportunityLineItem > ());
@@ -68,11 +68,9 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
                     }
 
                     // If we're not creating a new opp it's because all SKUs match the lines of the existing opp. Remove the provisional opp lines we created
-                    if (createNewOpp == false && oppLinesToInsertByRequestId.get(ir.Id) != null) 
-                    {
+                    if (createNewOpp == false && oppLinesToInsertByRequestId.get(ir.Id) != null) {
                         oppLinesToInsertByRequestId.remove(ir.Id);
-                    } else 
-                    {
+                    } else {
                         oppsToInsertByRequestId.put(ir.Id, IncomingRequestHelper.GetNewOpp(oldOpp, ir, this.recordTypeId));
                         // And because we have a new opp, we'll need to deactivate the old
                         oppsToUpdate.add(new Opportunity(Id = oldOpp.Id, Is_Active__c = false));
