@@ -169,6 +169,7 @@ public class AccountTrialCreationQueueable implements Queueable, Database.Allows
                         Account trialAccount = new Account(
                             Id = wrapper.accountId,
                             DEAR_tenant_Id__c = jsonResp.Data.TenantID,
+                            Core_Request_ID__c = jsonResp.Data.RequestID,
                             Core_Last_Updated_Date__c = System.now()
                         );
                         update trialAccount;

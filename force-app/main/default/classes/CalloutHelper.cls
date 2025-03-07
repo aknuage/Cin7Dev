@@ -30,7 +30,7 @@ public with sharing class CalloutHelper
             headers.put('Content-Type', 'application/json');
             headers.put('Accept', '*/*');
 
-            HttpResponse response = makeCallout(endpoint, 'POST', body, headers);
+            HttpResponse response = makeCallout(endpoint, 'POST', body, headers);    
             Integer responseCode = response.getStatusCode();
 
             // Validate response

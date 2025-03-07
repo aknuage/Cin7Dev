@@ -57,7 +57,6 @@ public class AccountTrialCreationQueueableTest {
             Related_Partner_Account__c = createPartner ? partnerAcct.Id : '',
             Core_Trial_Days__c = 60,
             Free_Trial_Demo_Data__c = true,
-
             Timezone__c = 'Pacific Standard Time (GMT-08:00)',
             RecordTypeId = CUSTOMER_ACC_TYPE
         );
@@ -75,11 +74,57 @@ public class AccountTrialCreationQueueableTest {
             Email = randomEmail,
             Phone = randomPhone,
             AccountId = account.Id,
-            RecordTypeId = CONTACT_REC_TYPE            
+            RecordTypeId = CONTACT_REC_TYPE
         );
         insert contact;
     }
-    
+
+    // Test Account Creation chains with Partner Client Relationship if partner account ID present.
+    @isTest
+    public static void testExecuteChainedQueueables() {
+        createAcctAndCon(true);
+        Account account = [SELECT Id, Name, BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry, Core_Industry__c FROM Account WHERE Name = 'Test Client Account' LIMIT 1];
+        Contact contact = [SELECT Id, Name, Email, FirstName, LastName, Phone FROM Contact WHERE AccountID = :account.Id LIMIT 1];
+        Account partnerAccount = [SELECT Id FROM ACCOUNT WHERE Id != :account.Id LIMIT 1];
+
+        AccountTrialWrapper wrapper = new AccountTrialWrapper();
+        wrapper.accountId = account.Id;
+        wrapper.contactId = contact.Id;
+        wrapper.accountName = account.Name;
+        wrapper.contactEmail = contact.Email;
+        wrapper.contactName = contact.FirstName + ' ' + contact.LastName;
+        wrapper.contactPhone = contact.Phone;
+        wrapper.billingStreet = account.BillingStreet;
+        wrapper.billingCity = account.BillingCity;
+        wrapper.billingState = account.BillingState;
+        wrapper.billingPostalCode = account.BillingPostalCode;
+        wrapper.billingCountry = account.BillingCountry;
+        wrapper.coreIndustry = account.Core_Industry__c;
+        wrapper.trialDays = 30;
+        wrapper.partnerOnboarding = true;
+        wrapper.partnerAccount = partnerAccount.Id;
+        wrapper.demoData = true;
+        wrapper.timeZone = 'Pacific Standard Time (GMT-08:00)';
+        
+        List<AccountTrialWrapper> wrappers = new List<AccountTrialWrapper>{ wrapper };
+
+        // 3. Set up the mock callout response
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGeneratorCoreTrial());
+        
+        // 4. Run the Queueable job
+        Test.startTest();
+            AccountTrialWrapper.createTrialAccount(wrappers);
+        Test.stopTest();
+
+        // 5. Verify: Check if the DEAR_Tenant_Id__c was updated on the Account record
+        Account updatedAccount = [SELECT DEAR_Tenant_Id__c, Core_Last_Updated_Date__c, Core_Request_ID__c FROM Account WHERE Id = :account.Id];
+        
+        System.assertNotEquals(null, updatedAccount.Core_Request_ID__c);
+        System.assertEquals('request123', updatedAccount.Core_Request_ID__c);
+        System.assertEquals('newTenant123', updatedAccount.DEAR_Tenant_Id__c);
+        System.assertNotEquals(null, updatedAccount.Core_Last_Updated_Date__c);
+
+    }
     
     /**
      * Test the execution of the AccountTrialCreationQueueable with mock data.
@@ -144,11 +189,13 @@ public class AccountTrialCreationQueueableTest {
         Test.stopTest();
 
         // 5. Verify: Check if the DEAR_Tenant_Id__c was updated on the Account record
-        Account updatedAccount = [SELECT DEAR_Tenant_Id__c, Core_Last_Updated_Date__c FROM Account WHERE Id = :account.Id];
+        Account updatedAccount = [SELECT DEAR_Tenant_Id__c, Core_Last_Updated_Date__c, Core_Request_ID__c FROM Account WHERE Id = :account.Id];
 
-        System.assertNotEquals(null, updatedAccount.DEAR_Tenant_Id__c, 'Tenant ID should be updated');
+        System.assertNotEquals(null, updatedAccount.Core_Request_ID__c);
+        System.assertEquals('request123', updatedAccount.Core_Request_ID__c);
         System.assertEquals('newTenant123', updatedAccount.DEAR_Tenant_Id__c);
         System.assertNotEquals(null, updatedAccount.Core_Last_Updated_Date__c);
+        System.assertNotEquals(null, updatedAccount.DEAR_Tenant_Id__c, 'Tenant ID should be updated');
 
     }
 

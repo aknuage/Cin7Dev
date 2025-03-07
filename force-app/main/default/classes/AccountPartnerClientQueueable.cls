@@ -66,10 +66,15 @@ public class AccountPartnerClientQueueable implements Queueable, Database.Allows
         // If Status Code is Okay (200), record last updated time on Partner Account
         if (res.getStatusCode() == 200)
         {
-            Account partnerAccount = new Account(
-                Id = partnerAcctId, Core_Last_Updated_Date__c = System.now()
-            );
-            update partnerAccount;
+            try {
+                System.debug('Updating Partner Account Core Updated Date');
+                Account partnerAccount = new Account(
+                    Id = partnerAcctId, Core_Last_Updated_Date__c = System.now()
+                );
+                update partnerAccount;
+            } catch (Exception ex) {
+                System.debug('Error updating partner client account: ' + ex.getMessage());
+            }
         }
         if (res.getBody() != null && res.getBody().length() > 0) {
             try {
