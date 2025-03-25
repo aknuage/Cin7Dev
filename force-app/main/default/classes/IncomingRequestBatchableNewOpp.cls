@@ -69,7 +69,6 @@ public with sharing class IncomingRequestBatchableNewOpp implements Database.Bat
                     // Update Account fields from CORE API callout // TODO: this and Account query above will ultimately be folded into the UpdateAccount pathway per CIN7-112
                     if(acc != null)
                     {
-                        acc.Name = jsonResp.Data.Organisation;
                         acc.Core_Account_Create_Date__c = jsonResp.Data.CreateDate;
                         acc.Core_Last_Updated_Date__c = jsonResp.Data.LastUpdatedDate;
                         acc.BillingCountry = jsonResp.Data.Country;
@@ -219,7 +218,18 @@ public with sharing class IncomingRequestBatchableNewOpp implements Database.Bat
                 }
             }
 
-            if (oppLinesToInsert.size() > 0) insert oppLinesToInsert;
+            if (oppLinesToInsert.size() > 0) 
+            {
+                try {
+                    insert oppLinesToInsert;
+                } catch (Exception e) {
+                    
+                    API_Error_Log__c newError = new API_Error_Log__c(
+                        Error_Message__c = 'Error processing Account, Opportunity or incoming SKU: ' + e.getMessage() + ', Line #: ' + e.getLineNumber()
+                    );
+                    apiErrorLogsToInsert.add(newError);
+                }
+            }
         }
 
         if(accountsToUpdate.size() > 0) update accountsToUpdate;

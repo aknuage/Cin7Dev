@@ -2,6 +2,7 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
 
     private Id recordTypeId;
     private List < Incoming_Request__c > requestsToProcess;
+    private static IncomingRequestHelper.ContactJobInputWrapper contactJob;
 
     public IncomingReqUpdateSubscriptionBatch(List < Incoming_Request__c > newRequests) {
         this.requestsToProcess = newRequests;
@@ -39,8 +40,8 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
                     Opportunity oldOpp = IncomingRequestHelper.GetOldOppByTenantId(tenantId);
 
                     // Only chain queueable job if there are contacts for processing
-                    if(jsonResp.Data.Users.size()>0){
-                        System.enqueueJob(new ContactProcessQueueable(jsonResp.Data.Users, jsonResp.Data.TenantID));
+                    if (jsonResp.Data.Users.size() > 0) {
+                        contactJob = new IncomingRequestHelper.ContactJobInputWrapper(jsonResp.Data.Users, jsonResp.Data.TenantID);
                     }
 
                     Boolean createNewOpp = false; // move to helper method
@@ -94,5 +95,11 @@ global class IncomingReqUpdateSubscriptionBatch implements Database.Batchable < 
 
         }
 
-        public void finish(Database.BatchableContext bc) {}
+        // call Queueable jobs
+        public void finish(Database.BatchableContext bc) {
+            if (contactJob != null) {
+                System.enqueueJob(new ContactProcessQueueable(contactJob));
+            }
+        }
+        
     }

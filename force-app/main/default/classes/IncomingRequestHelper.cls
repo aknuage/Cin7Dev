@@ -364,4 +364,14 @@ public with sharing class IncomingRequestHelper
         return false; // No new Opportunity needed
     }
 
+    public class ContactJobInputWrapper {
+        public List<IncomingRequestJSONParse.Users> users;
+        public String tenantId;
+        
+        public ContactJobInputWrapper(List<IncomingRequestJSONParse.Users> users, String tenantId) {
+            this.users = users;
+            this.tenantId = tenantId;
+        }
+    }
+
 }

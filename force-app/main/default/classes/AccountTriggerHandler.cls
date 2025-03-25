@@ -82,15 +82,20 @@ public with sharing class AccountTriggerHandler
 
         // Get accounts that are newly qualified for Northpass
         Set<Id> accountIds = new Set<Id>();
-        for (Account a : newMap.values())
-        {
-            if (a.Is_Northpass_Qualified__c && (a.Is_Northpass_Qualified__c != oldMap.get(a.Id).Is_Northpass_Qualified__c))
-            {
-                System.debug('account tenant id: ' + a.DEAR_Tenant_Id__c);
-                System.debug('is account Northpass qualified: ' + a.Is_Northpass_Qualified__c + '. was account not qualified before? :' + oldMap.get(a.Id).Is_Northpass_Qualified__c);
+        for (Account a : newMap.values()) {
+            Boolean wasQualifiedBefore = oldMap.get(a.Id).Is_Northpass_Qualified__c == true;
+            Boolean isQualifiedNow = a.Is_Northpass_Qualified__c == true;
+        
+            System.debug('account tenant id: ' + a.DEAR_Tenant_Id__c);
+            System.debug('is account Northpass qualified: ' + isQualifiedNow + '. was account not qualified before? :' + wasQualifiedBefore);
+        
+            if (isQualifiedNow && !wasQualifiedBefore) {
+                System.debug('Adding to NorthPass Qualified Account ID set');
                 accountIds.add(a.Id);
             }
         }
+        
+        if (accountIds.size() == 0) return;
 
         // Query for related active Contacts
         List<AccountContactRelation> acrs = [SELECT AccountId, Account.Dear_Tenant_Id__c, Account.Cin7_Username__c, ContactId,

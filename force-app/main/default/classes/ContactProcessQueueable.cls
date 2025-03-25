@@ -11,6 +11,7 @@ public with sharing class ContactProcessQueueable implements Queueable
     List<IncomingRequestJSONParse.Users> cin7Users = new List<IncomingRequestJSONParse.Users>();
     String tenantId;
     Id sfAccountId;
+    public static Integer executionCount = 0;
 
     // Constructor
     public ContactProcessQueueable(List<IncomingRequestJSONParse.Users> cin7_users, String tenant_id) 
@@ -21,8 +22,17 @@ public with sharing class ContactProcessQueueable implements Queueable
         sfAccountId = [SELECT Id FROM Account WHERE DEAR_Tenant_ID__c = :tenantId].Id;
     }
 
+    public ContactProcessQueueable(IncomingRequestHelper.ContactJobInputWrapper wrapper) 
+    {
+        cin7Users = wrapper.users;
+        tenantId = wrapper.tenantId;
+        system.debug(tenantId);
+        sfAccountId = [SELECT Id FROM Account WHERE DEAR_Tenant_ID__c = :tenantId].Id;
+    }
+
     public void execute(QueueableContext context)
     {
+        executionCount++;
         // Collect core user ids and core email addresses
         Set<String> cin7UserIds = new Set<String>();
         Set<String> cin7UserEmails = new Set<String>();
@@ -70,7 +80,7 @@ public with sharing class ContactProcessQueueable implements Queueable
                 {
                     // Matching contact found, update contact fields to match
                     // If incoming first/last populated but different than existing first/last, update existing.
-                    String newFirstName = u.DisplayName.substringBefore(' ');
+                    String newFirstName = defaultFirstNameIfBlank(u);
                     String newLastName = u.DisplayName.substringAfter(' ');
                     if (String.isNotBlank(newFirstName) && newFirstName.trim() != matchingContact.FirstName?.trim()) matchingContact.FirstName = newFirstName;
                     if (String.isNotBlank(newLastName) && newLastName.trim() != matchingContact.LastName?.trim()) matchingContact.LastName = newLastName;
@@ -91,14 +101,21 @@ public with sharing class ContactProcessQueueable implements Queueable
             if (matchingContact == null)
             {
                 System.debug('non matching contact: ' + u.DisplayName);
+                String firstName = defaultFirstNameIfBlank(u);
+                String lastName = String.isNotBlank(u.DisplayName) ? u.DisplayName.substringAfter(' ') : 'Cin7 Core User';
+                
+                // Ensure last name is properly assigned
+                if (String.isBlank(lastName)) {
+                    lastName = setDefaultNameIfBlank('');
+                }
+                
                 Contact newContact = new Contact(
-                    FirstName = u.DisplayName.substringBefore(' '),
-                    LastName = setDefaultNameIfBlank( u.DisplayName.substringAfter(' ')),
+                    FirstName = firstName,
+                    LastName = lastName,
                     AccountId = sfAccountId,
                     Email = u.Email,
                     Cin7_Core_User_Id__c = u.UserId
                 );
-                
                 contactsToInsert.add(newContact);
             }
         }
@@ -210,10 +227,38 @@ public with sharing class ContactProcessQueueable implements Queueable
     }
 
     /**
+     * If User's first name needs to be updated, set it to the string before their Display Name.
+     * If that is blank, set it to the string before the @domain.com portion of their email address.
+     * Else return empty string;
+     * 
+     * @param IncomingRequestJSONParse.Users user 
+     * @return string
+     * @author Akelly @ NuAge : CIN7-132 : March 2025
+     */
+    private String defaultFirstNameIfBlank(IncomingRequestJSONParse.Users user) 
+    {
+        System.debug('entering default first name: ' + user.DisplayName);
+    
+        if (String.isNotBlank(user.DisplayName)) {
+            if (user.DisplayName.contains(' ') && !String.isBlank(user.DisplayName.subStringBefore(' '))) {
+                return user.DisplayName.substringBefore(' ');
+            }
+        }
+        
+        if (String.isNotBlank(user.Email) && user.Email.contains('@')) {
+            return user.Email.substringBefore('@').capitalize();
+        }
+    
+        return ''; // Fall back on blank string
+    }
+    
+    
+    
+    /**
      * If string passed-in is blank, set to 'Cin7 Core User' and return the result.
      * 
      * @param lastName 
-     * @return string set to 'Cin7 Core User' of lastName is blank, otherwise return lastName
+     * @return string set to 'Cin7 Core User' if lastName is blank, otherwise return lastName
      * @author nkoonce @ NuAge : CIN7-80 : May 2024, CIN7-113 : Change "Default Name" assignment to "Cin7 Core User"
      */
     private String setDefaultNameIfBlank(String lastName)
